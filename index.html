@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taraddud | تردد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]] },
+    options: { skipHtmlTags: ["script","noscript","style","textarea","pre","code"] }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<style>
+  :root {
+    --bg: #090c12;
+    --bg-1: #0e131b;
+    --bg-2: #141a25;
+    --glass: #ffffff09;
+    --glass-strong: #ffffff13;
+    --border: #ffffff14;
+    --border-strong: #ffffff26;
+    --text: #eef1f6;
+    --text-dim: #8d95a8;
+    --text-faint: #565e70;
+    --accent-a: #4d8dff;
+    --accent-b: #ffb15e;
+    --accent-grad: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+    --accent-ink: #06080d;
+    --danger: #ff6b6b;
+    --ok: #3ddc97;
+    --warn: #ffab4a;
+    --radius-s: 10px;
+    --radius-m: 14px;
+    --radius-l: 20px;
+    --font-ar: 'IBM Plex Sans Arabic', 'Space Grotesk', sans-serif;
+    --font-en: 'Space Grotesk', 'IBM Plex Sans Arabic', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --shadow-elev: 0 24px 60px -22px #00000075, 0 4px 18px -6px #00000060;
+    --shadow-soft: 0 10px 24px -14px #00000060;
+  }
+  html[data-theme="light"] {
+    --bg: #f3f4f8;
+    --bg-1: #ffffff;
+    --bg-2: #fbfbfd;
+    --glass: #ffffffd9;
+    --glass-strong: #ffffff;
+    --border: #14161f14;
+    --border-strong: #14161f28;
+    --text: #14161e;
+    --text-dim: #565e70;
+    --text-faint: #8991a3;
+    --accent-a: #2f6fe0;
+    --accent-b: #cc7a26;
+    --accent-ink: #ffffff;
+    --danger: #d43f4f;
+    --ok: #12986c;
+    --warn: #b3720f;
+    --shadow-elev: 0 24px 60px -26px #14161f35, 0 4px 18px -8px #14161f22;
+    --shadow-soft: 0 10px 22px -14px #14161f30;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ar);
+    min-height: 100vh;
+    line-height: 1.65;
+    background-image:
+      radial-gradient(circle at 100% -8%, #4d8dff14 0%, transparent 42%),
+      radial-gradient(circle at -6% 96%, #ffb15e10 0%, transparent 40%);
+    background-attachment: fixed;
+    transition: background-color .2s ease, color .2s ease;
+    -webkit-font-smoothing: antialiased;
+  }
+  html[lang="en"] body { font-family: var(--font-en); }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+  input, select { font-family: inherit; }
+  ::selection { background: var(--accent-a); color: #fff; }
+  :focus-visible { outline: 2px solid var(--accent-a); outline-offset: 2px; border-radius: 4px; }
+
+  .grad-text { color: inherit; }
+
+  /* ---------- shell ---------- */
+  .shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 272px; flex-shrink: 0;
+    background: var(--bg-1); border-inline-end: 1px solid var(--border);
+    padding: 24px 18px; display: flex; flex-direction: column; gap: 22px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; cursor: pointer; }
+  .brand-mark {
+    width: 38px; height: 38px; background: var(--accent-grad);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent-ink); flex-shrink: 0;
+    border-start-start-radius: 13px; border-start-end-radius: 13px;
+    border-end-end-radius: 13px; border-end-start-radius: 4px;
+  }
+  .brand-mark svg { width: 56%; height: 56%; overflow: visible; }
+  .brand-text h1 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.1px; font-family: var(--font-mono); }
+  .brand-text p { margin: 1px 0 0; font-size: 11px; color: var(--text-faint); }
+
+  .toggle-row { display: flex; gap: 8px; }
+  .icon-toggle {
+    flex: 1; background: var(--glass); border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: var(--radius-s); padding: 8px; font-size: 12.5px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .icon-toggle svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .icon-toggle:hover { border-color: var(--border-strong); color: var(--text); background: var(--glass-strong); }
+
+  .search-box { position: relative; }
+  .search-box input {
+    width: 100%; background: var(--glass); border: 1px solid var(--border); color: var(--text);
+    border-radius: var(--radius-s); padding: 9px 34px 9px 12px; font-size: 13px; outline: none; transition: border-color .15s, background .15s;
+  }
+  html[dir="rtl"] .search-box input { padding: 9px 12px 9px 34px; }
+  .search-box input:focus { border-color: var(--accent-a); background: var(--glass-strong); }
+  .search-box .search-ic { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none; display: flex; }
+  .search-box .search-ic svg { width: 15px; height: 15px; }
+
+  .nav-group-label { font-size: 11px; color: var(--text-faint); margin: 2px 2px 0; letter-spacing: .3px; }
+  .nav-list { display: flex; flex-direction: column; gap: 2px; }
+  .subject-link {
+    position: relative;
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px 9px 13px; border-radius: var(--radius-s);
+    color: var(--text-dim); font-size: 14px; font-weight: 500; border: 1px solid transparent;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  html[dir="rtl"] .subject-link { padding: 9px 13px 9px 10px; }
+  .subject-link:hover { background: var(--glass); color: var(--text); }
+  .subject-link.active { background: var(--glass-strong); color: var(--text); border-color: var(--border); }
+  .subject-link.active::before {
+    content: ""; position: absolute; inset-inline-start: 0; top: 22%; bottom: 22%; width: 3px;
+    background: var(--accent-a); border-radius: 3px;
+  }
+  .subject-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .subject-link .count { margin-inline-start: auto; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); }
+  .empty-side-note { font-size: 12.5px; color: var(--text-faint); padding: 10px 4px; line-height: 1.6; }
+
+  .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 9px; }
+  .who-chip {
+    display: flex; align-items: center; gap: 9px; padding: 9px 10px;
+    background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-s);
+    font-size: 12.5px; color: var(--text-dim);
+  }
+  .who-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); flex-shrink: 0; }
+  .ghost-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: var(--radius-s); padding: 9px 12px; font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; gap: 8px; justify-content: center;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .ghost-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  html[dir="rtl"] .icon-flip svg { transform: scaleX(-1); }
+  .ghost-btn:hover { border-color: var(--accent-a); color: var(--accent-a); background: var(--glass); }
+  .ghost-btn.active-mode { border-color: var(--accent-a); color: var(--accent-a); background: var(--glass); }
+
+  .credit-wrap {
+    position: fixed; z-index: 40; inset-inline-end: 18px; bottom: 18px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    pointer-events: none;
+  }
+  .credit-wrap * { pointer-events: auto; }
+  @media (max-width: 480px) {
+    .credit-wrap { inset-inline-end: 12px; bottom: 12px; }
+    .credit-wrap .credit-hint { display: none; }
+    .credit-link { padding: 10px 12px; font-size: 10.5px; }
+  }
+  .credit-hint {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: var(--accent-b); font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+  .credit-hint svg { width: 24px; height: 20px; flex-shrink: 0; }
+  html[dir="rtl"] .credit-hint svg { transform: scaleX(-1); }
+  .credit-link {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--accent-grad); color: var(--accent-ink) !important;
+    font-size: 12px; font-weight: 800; letter-spacing: .3px;
+    padding: 13px 14px; border-radius: 999px;
+    box-shadow: 0 6px 18px -6px rgba(0,0,0,.4);
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .credit-link svg { width: 12px; height: 12px; flex-shrink: 0; }
+  html[dir="rtl"] .credit-link svg { transform: scaleX(-1); }
+  .credit-link:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  html[dir="rtl"] .credit-link:hover svg { transform: scaleX(-1) translateX(3px); }
+  .credit-link:hover svg { transform: translateX(3px); }
+  @keyframes creditPulse { 0%,100% { box-shadow: 0 6px 18px -6px rgba(0,0,0,.4), 0 0 0 0 rgba(77,141,255,.35); } 50% { box-shadow: 0 6px 18px -6px rgba(0,0,0,.4), 0 0 0 6px rgba(77,141,255,0); } }
+  .credit-link { animation: creditPulse 2.4s ease-in-out infinite; }
+  @keyframes creditBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+  .credit-hint svg { animation: creditBounce 1.6s ease-in-out infinite; }
+
+  .main { flex: 1; min-width: 0; padding: 34px 46px 64px; }
+  .topbar { display: none; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 22px 4px 8px; max-width: 720px; }
+  .hero .kicker { font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); margin: 0 0 14px; letter-spacing: .3px; }
+  .hero h2 { font-size: 34px; margin: 0 0 16px; font-weight: 700; line-height: 1.28; letter-spacing: -.4px; }
+  .hero p { color: var(--text-dim); font-size: 15.5px; max-width: 58ch; margin: 0; }
+  .hero-wave { display: block; margin: 28px 0 6px; width: 100%; max-width: 460px; height: auto; }
+  .hero-wave .w1 { stroke: var(--accent-a); }
+  .hero-wave .w2 { stroke: var(--accent-b); opacity: .4; }
+
+  .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); gap: 14px; margin-top: 6px; }
+  .subject-card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-m);
+    padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 16px;
+    transition: border-color .15s, transform .15s, background .15s; backdrop-filter: blur(6px);
+  }
+  .subject-card:hover { border-color: var(--border-strong); background: var(--glass-strong); transform: translateY(-2px); }
+  .subject-card h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .subject-meta { font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); display: flex; gap: 12px; }
+
+  /* ring icon: SVG progress ring wrapping a colored initials tile, used for subjects everywhere */
+  .ring-wrap { position: relative; flex-shrink: 0; }
+  .ring-svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ring-track { fill: none; stroke: var(--border); }
+  .ring-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset .4s ease; }
+  .ring-icon-inner {
+    position: absolute; inset: 15%; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 600; line-height: 1;
+    border-start-start-radius: 30%; border-start-end-radius: 30%;
+    border-end-end-radius: 30%; border-end-start-radius: 10%;
+  }
+
+  /* ---------- subject detail ---------- */
+  .subject-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .subject-header h2 { margin: 0; font-size: 23px; font-weight: 700; }
+  .subject-header .sub { color: var(--text-faint); font-size: 12.5px; font-family: var(--font-mono); margin-top: 4px; }
+
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+  .tab-btn {
+    background: transparent; border: none; color: var(--text-faint); padding: 10px 4px;
+    font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    margin-inline-end: 20px; transition: color .15s, border-color .15s;
+  }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent-a); }
+  .tab-btn:hover:not(.active) { color: var(--text-dim); }
+
+  .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(252px, 1fr)); gap: 14px; }
+  .item-card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-m);
+    overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s, background .15s;
+    position: relative;
+  }
+  .item-card:hover { border-color: var(--accent-a); transform: translateY(-2px); background: var(--glass-strong); }
+  .item-thumb {
+    height: 108px; display: flex; align-items: center; justify-content: center; position: relative;
+    background: linear-gradient(150deg, var(--bg-2), var(--bg-1)); border-bottom: 1px solid var(--border);
+    color: var(--text-faint); transition: color .15s;
+  }
+  .thumb-accent { position: absolute; inset-inline: 0; top: 0; height: 3px; }
+  .item-thumb svg { width: 26px; height: 26px; }
+  .item-card:hover .item-thumb { color: var(--accent-a); }
+  .item-body { padding: 13px 15px; }
+  .item-body h4 { margin: 0 0 4px; font-size: 14px; font-weight: 600; line-height: 1.45; }
+  .item-body .item-type { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--text-faint); }
+  .item-subject-tag { font-size: 10px; color: var(--text-faint); font-family: var(--font-mono); margin-bottom: 4px; }
+  .watch-toggle {
+    background: var(--glass-strong); border: 1px solid var(--border); color: var(--text-faint);
+    border-radius: 50%; width: 27px; height: 27px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color .15s, color .15s, background .15s;
+  }
+  .watch-toggle svg { width: 13px; height: 13px; }
+  .watch-toggle:hover { border-color: var(--accent-a); color: var(--accent-a); }
+  .watch-toggle.done { background: var(--ok); border-color: var(--ok); color: var(--accent-ink); }
+
+  .progress-wrap { display: flex; align-items: center; gap: 10px; margin: -8px 0 22px; }
+  .progress-track { flex: 1; height: 5px; border-radius: 4px; background: var(--glass); border: 1px solid var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent-grad); border-radius: 4px; transition: width .3s ease; }
+  .progress-label { font-size: 11.5px; color: var(--text-faint); font-family: var(--font-mono); white-space: nowrap; }
+
+  .empty-state { border: 1px dashed var(--border-strong); border-radius: var(--radius-m); padding: 46px 20px; text-align: center; color: var(--text-faint); }
+  .empty-state strong { display: block; color: var(--text-dim); font-size: 15px; margin-bottom: 6px; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay { position: fixed; inset: 0; background: #04060a9c; backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  .modal-box { width: min(920px, 100%); background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--radius-l); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-elev); }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .modal-head h4 { margin: 0; font-size: 14.5px; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--text-faint); padding: 5px; display: flex; border-radius: 7px; transition: color .15s, background .15s; }
+  .modal-close svg { width: 17px; height: 17px; }
+  .modal-close:hover { color: var(--text); background: var(--glass); }
+  .modal-frame-wrap { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+  .modal-frame-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .modal-frame-wrap.pdf { aspect-ratio: 4/5; }
+  .modal-frame-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; object-fit: contain; }
+  .modal-frame-wrap.image-mode { aspect-ratio: auto; max-height: 78vh; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
+  .modal-frame-wrap.image-mode img { position: static; width: auto; height: auto; max-width: 100%; max-height: 78vh; object-fit: contain; }
+  .modal-frame-wrap.audio-mode { aspect-ratio: auto; height: 130px; background: var(--bg-2); display: flex; align-items: center; justify-content: center; padding: 0 26px; }
+  .modal-frame-wrap.audio-mode audio { width: 100%; }
+  .media-badge {
+    position: absolute; top: 10px; inset-inline-start: 10px; z-index: 2;
+    background: #000000a8; color: #fff; font-size: 10.5px; font-weight: 700; letter-spacing: .3px;
+    padding: 4px 9px; border-radius: 999px; text-transform: uppercase; font-family: var(--font-mono);
+    pointer-events: none;
+  }
+
+  /* ---------- auth screen (student) ---------- */
+  .auth-shell { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .auth-card {
+    width: 100%; max-width: 400px; background: var(--glass); border: 1px solid var(--border);
+    border-radius: var(--radius-l); padding: 32px 28px; box-shadow: var(--shadow-elev);
+    backdrop-filter: blur(6px);
+  }
+  .auth-card .auth-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; justify-content: center; }
+  .auth-tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-s); padding: 4px; margin-bottom: 22px; }
+  .auth-tab { flex: 1; text-align: center; padding: 8px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--text-faint); background: none; border: none; transition: background .15s, color .15s; }
+  .auth-tab.active { background: var(--accent-a); color: var(--accent-ink); }
+  .auth-card h2 { margin: 0 0 6px; font-size: 19px; font-weight: 700; text-align: center; }
+  .auth-card .sub-desc { margin: 0 0 20px; color: var(--text-faint); font-size: 12.5px; text-align: center; line-height: 1.6; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 13px; }
+  .field label { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+  .field input, .field select {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: var(--radius-s); padding: 10px 12px; font-size: 14px; outline: none; transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent-a); }
+  .primary-btn {
+    background: var(--accent-grad); color: var(--accent-ink); border: none; width: 100%;
+    padding: 11px 18px; font-size: 14px; font-weight: 700; margin-top: 6px;
+    border-start-start-radius: var(--radius-s); border-start-end-radius: var(--radius-s);
+    border-end-end-radius: var(--radius-s); border-end-start-radius: 4px;
+    transition: filter .15s, transform .1s;
+  }
+  .primary-btn:hover { filter: brightness(1.07); }
+  .primary-btn:active { transform: scale(.99); }
+  .primary-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .auth-error { background: #ff6b6b14; border: 1px solid #ff6b6b3a; color: var(--danger); font-size: 12px; padding: 9px 11px; border-radius: var(--radius-s); margin-bottom: 12px; }
+  .auth-ok { background: #3ddc9714; border: 1px solid #3ddc973a; color: var(--ok); font-size: 12.5px; padding: 12px 13px; border-radius: var(--radius-s); text-align: center; line-height: 1.6; }
+  .auth-note { text-align: center; font-size: 12px; color: var(--text-faint); margin-top: 14px; }
+
+  /* ---------- admin ---------- */
+  .admin-wrap { max-width: 900px; }
+  .admin-head { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .admin-head h2 { margin: 0 0 6px; font-size: 22px; font-weight: 700; }
+  .admin-head p { margin: 0; color: var(--text-dim); font-size: 13.5px; }
+
+  .panel { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 22px; margin-bottom: 18px; }
+  .panel h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .panel .badge { font-family: var(--font-mono); font-size: 10.5px; background: var(--accent-a); color: var(--accent-ink); padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+  .panel .panel-desc { margin: 0 0 18px; font-size: 12.5px; color: var(--text-faint); }
+
+  .field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field-row .field { flex: 1; min-width: 170px; }
+  .color-swatches { display: flex; gap: 8px; }
+  .swatch { width: 24px; height: 24px; border-radius: 7px; border: 2px solid transparent; cursor: pointer; transition: transform .1s, border-color .15s; }
+  .swatch:hover { transform: scale(1.08); }
+  .swatch.selected { border-color: var(--text); }
+
+  .row-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .row-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-s); }
+  .row-item .rdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .row-item .rmain { flex: 1; min-width: 0; }
+  .row-item .rmain .rt { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-item .rmain .rs { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+  .row-del, .row-act, .row-edit {
+    background: none; border: 1px solid var(--border); color: var(--danger); border-radius: 7px;
+    padding: 6px 10px; font-size: 11.5px; flex-shrink: 0; font-weight: 600; transition: border-color .15s, background .15s;
+  }
+  .row-del:hover { border-color: var(--danger); background: #ff6b6b14; }
+  .row-edit { color: var(--text-dim); }
+  .row-edit:hover { border-color: var(--accent-a); color: var(--accent-a); background: var(--glass); }
+  .panel.editing { border-color: var(--accent-a); }
+  .edit-badge { font-size: 10.5px; background: var(--glass-strong); border: 1px solid var(--accent-a); color: var(--accent-a); padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-inline-start: 8px; }
+  .row-act.accept { color: var(--ok); }
+  .row-act.accept:hover { border-color: var(--ok); background: #3ddc9714; }
+  .row-act.reject { color: var(--danger); }
+  .row-act.reject:hover { border-color: var(--danger); background: #ff6b6b14; }
+  .row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .sync-note { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-faint); margin-bottom: 18px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+  .sync-dot.off { background: var(--text-faint); }
+
+  .status-pill { font-size: 10.5px; padding: 2px 9px; border-radius: 20px; font-weight: 700; }
+  .status-pill.pending { background: #ffab4a1f; color: var(--warn); }
+  .status-pill.approved { background: #3ddc971f; color: var(--ok); }
+  .status-pill.rejected { background: #ff6b6b1f; color: var(--danger); }
+
+  /* ---------- toasts ---------- */
+  .toast-root { position: fixed; bottom: 22px; inset-inline-end: 22px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--bg-1); border: 1px solid var(--border-strong); border-inline-start: 3px solid var(--ok);
+    border-radius: var(--radius-s); padding: 12px 16px; font-size: 13px; color: var(--text);
+    box-shadow: var(--shadow-soft); animation: toastIn .25s ease both; max-width: 320px;
+  }
+  .toast.err { border-inline-start-color: var(--danger); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: translateY(0);} }
+  .toast.out { animation: toastOut .2s ease forwards; }
+  @keyframes toastOut { to { opacity: 0; transform: translateY(6px);} }
+
+  /* ---------- confirm dialog ---------- */
+  .confirm-box { width: min(380px, 100%); background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--radius-l); padding: 24px; box-shadow: var(--shadow-elev); }
+  .confirm-box p { margin: 0 0 20px; font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions button { flex: 1; }
+  .danger-btn {
+    background: var(--danger); color: #fff; border: none; border-radius: var(--radius-s);
+    padding: 11px 18px; font-size: 14px; font-weight: 700; transition: filter .15s;
+  }
+  .danger-btn:hover { filter: brightness(1.08); }
+
+  /* ---------- stats ---------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-m); padding: 16px 18px; }
+  .stat-card .num { font-family: var(--font-mono); font-size: 23px; font-weight: 700; }
+  .stat-card .lbl { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+
+  /* ---------- reorder ---------- */
+  .subject-group-label { font-size: 12px; color: var(--text-faint); font-weight: 600; margin: 14px 0 6px; display: flex; align-items: center; gap: 6px; }
+  .reorder-btns { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+  .reorder-btns button { background: none; border: 1px solid var(--border); color: var(--text-faint); border-radius: 4px; width: 20px; height: 16px; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .reorder-btns button svg { width: 10px; height: 10px; }
+  .reorder-btns button:hover:not(:disabled) { color: var(--accent-a); border-color: var(--accent-a); }
+  .reorder-btns button:disabled { opacity: .25; cursor: default; }
+
+  /* ---------- continue learning ---------- */
+  .continue-section { margin: 6px 0 32px; }
+  .continue-section h3 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+  .continue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 13px; }
+  .continue-card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: var(--radius-m);
+    padding: 14px 16px; cursor: pointer; transition: border-color .15s, transform .15s, background .15s;
+    display: flex; align-items: center; gap: 13px;
+  }
+  .continue-card:hover { border-color: var(--border-strong); background: var(--glass-strong); transform: translateY(-2px); }
+  .continue-card .cc-info { min-width: 0; flex: 1; }
+  .continue-card .cc-name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .continue-card .cc-count { font-size: 11.5px; color: var(--text-faint); font-family: var(--font-mono); margin-top: 3px; }
+
+  /* ---------- tablet / small laptop ---------- */
+  @media (max-width: 1180px) and (min-width: 861px) {
+    .sidebar { width: 224px; padding: 22px 14px; }
+    .main { padding: 30px 28px 56px; }
+    .subject-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+    .content-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  }
+
+  /* ---------- mobile ---------- */
+  .menu-toggle { display: none; align-items: center; justify-content: center; }
+  .menu-toggle svg { width: 19px; height: 19px; }
+  @media (max-width: 860px) {
+    .shell { flex-direction: column; }
+    .sidebar { position: fixed; z-index: 60; inset: 0 0 0 auto; width: 80vw; max-width: 300px; transform: translateX(100%); transition: transform .2s ease; height: 100vh; height: 100dvh; }
+    html[dir="ltr"] .sidebar { inset: 0 auto 0 0; transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg-1); position: sticky; top: 0; z-index: 40; }
+    .menu-toggle { display: flex; background: none; border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 42px; height: 42px; }
+    .main { padding: 18px 16px 50px; }
+    .hero { padding-top: 14px; }
+    .hero h2 { font-size: 25px; }
+    .hero-wave { max-width: 100%; }
+    .sidebar-scrim { display: none; position: fixed; inset: 0; background: #000a; z-index: 55; }
+    .sidebar-scrim.open { display: block; }
+    .subject-grid, .content-grid { grid-template-columns: 1fr; }
+    .continue-grid { grid-template-columns: 1fr; }
+    .admin-head { flex-direction: column; }
+    .field-row { flex-direction: column; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 380px) {
+    .toggle-row { flex-direction: column; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="sidebar-scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand" id="brandBtn">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M0 12Q3 4 6 12T12 12T18 12T24 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="brand-text">
+        <h1 id="brandName">تردد</h1>
+        <p id="brandTag">اتصالات وحاسبات</p>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <button class="icon-toggle" id="langToggle"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.7 5.4 3.7 8.5s-1.3 6.2-3.7 8.5c-2.4-2.3-3.7-5.4-3.7-8.5S9.6 5.8 12 3.5Z" stroke="currentColor" stroke-width="1.6"/></svg><span id="langToggleLabel">EN</span></button>
+      <button class="icon-toggle" id="themeToggle"><span id="themeToggleIcon"></span><span id="themeToggleLabel"></span></button>
+    </div>
+
+    <div id="searchWrap"></div>
+
+    <div>
+      <div class="nav-group-label" id="subjectsLabel">المواد</div>
+      <div class="nav-list" id="subjectNavList"></div>
+    </div>
+
+    <div class="sidebar-foot" id="sidebarFoot"></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="menu-toggle" id="menuToggle"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <div class="brand"><div class="brand-mark" style="width:30px;height:30px;"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M0 12Q3 4 6 12T12 12T18 12T24 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<div class="credit-wrap" id="creditWrap">
+  <div class="credit-hint">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 5C14 4 6 8 5 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M2 12L5 17L10 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="creditClickLabel">CLICK</span>
+  </div>
+  <a class="credit-link" href="https://fahd-ahmed-hassan.vercel.app/?utm_source=ig&amp;utm_medium=social&amp;utm_content=link_in_bio&amp;fbclid=PAb21jcAUaAGRwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzU2NzA2NzM0MzM1MjQyNwABp5KH6O46jM4ijYLBBTs6si5DudkNDvlfW89kIQkk8jyH8PaaOMTpx5HNpprP_aem_jJYkkmQzcorNs1UJ1_WvIA" target="_blank" rel="noopener noreferrer"><span>POWERED BY ENG FAHD AHMED</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+</div>
+
+<div id="modalRoot"></div>
+<div id="confirmRoot"></div>
+<div class="toast-root" id="toastRoot"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- icon set ---------------- */
+  const ICO = {
+    wave: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M0 12Q3 4 6 12T12 12T18 12T24 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 12h17M12 3.5c2.4 2.3 3.7 5.4 3.7 8.5s-1.3 6.2-3.7 8.5c-2.4-2.3-3.7-5.4-3.7-8.5S9.6 5.8 12 3.5Z" stroke="currentColor" stroke-width="1.6"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.3" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.5M12 18.9v2.5M4.3 4.3l1.8 1.8M17.9 17.9l1.8 1.8M2.6 12h2.5M18.9 12h2.5M4.3 19.7l1.8-1.8M17.9 6.1l1.8-1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.2 14.4A8.5 8.5 0 1 1 9.7 3.9a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.6-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.3" stroke="currentColor" stroke-width="1.4" opacity=".5"/><path d="M10 8.3v7.4l6.2-3.7-6.2-3.7Z" fill="currentColor"/></svg>',
+    doc: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.3 2.6h7.4l4 4V21a.5.5 0 0 1-.5.5H6.3a.5.5 0 0 1-.5-.5V3.1a.5.5 0 0 1 .5-.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M13.7 2.6V7a1 1 0 0 0 1 1h3.3" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.4 13.2h7.2M8.4 16.3h7.2M8.4 10.1h3.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v2.3M12 18.2v2.3M20.5 12h-2.3M5.8 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+    logout: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.3 4.2H5.8a1 1 0 0 0-1 1v13.6a1 1 0 0 0 1 1h3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.2 8.1 17.5 12l-4.3 3.9M17.2 12H9.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    chevUp: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 15.5 12 8l7 7.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevDown: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 8.5 12 16l7-7.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12.6l4.8 4.8L20 6.6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+
+  /* ---------------- i18n ---------------- */
+  let currentLang = "ar";
+  function tr(ar, en){ return currentLang === "ar" ? ar : en; }
+  function applyDocLang(){
+    document.documentElement.lang = currentLang;
+    document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+    document.getElementById("brandName").textContent = tr("تردد", "Taraddud");
+    document.getElementById("brandTag").textContent = tr("اتصالات وحاسبات", "Comm. & Computers Eng.");
+    document.getElementById("subjectsLabel").textContent = tr("المواد", "Subjects");
+    document.getElementById("langToggleLabel").textContent = currentLang === "ar" ? "EN" : "AR";
+  }
+
+  /* ---------------- theme ---------------- */
+  let currentTheme = "dark";
+  function applyTheme(){
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    document.getElementById("themeToggleLabel").textContent = currentTheme === "dark" ? tr("داكن", "Dark") : tr("فاتح", "Light");
+    const icoEl = document.getElementById("themeToggleIcon");
+    if (icoEl) icoEl.innerHTML = currentTheme === "dark" ? ICO.moon : ICO.sun;
+  }
+
+  /* ---------------- data layer ---------------- */
+  const PALETTE = ["#4d8dff", "#ffb15e", "#3ddc97", "#ff6f91", "#8f7cff", "#3fc0d0"];
+  const DOC_PATH = "taraddud/content";
+  const LOCAL_KEY = "taraddud_platform_data_v2";
+  const SESSION_KEY = "taraddud_student_session";
+
+  /* =====================================================================
+     ربط قاعدة بيانات Firebase (مجانية) — عشان بيانات الطلاب والمواد
+     تتزامن بين كل زوار الموقع (مش بس متصفحك إنت).
+
+     الخطوات:
+     1) افتح https://console.firebase.google.com وسجل دخول بحساب جوجل
+     2) اعمل "Add project" (مجاني)
+     3) من القايمة الجانبية: Build > Firestore Database > Create database
+        (اختار Start in production mode ثم اختار أقرب منطقة ليك)
+     4) بعد إنشاء قاعدة البيانات، روح لإعدادات المشروع (⚙️ Project settings)
+        > Your apps > اعمل "</> Web app" جديد، وهياديك object زي ده:
+        { apiKey: "...", authDomain: "...", projectId: "...", ... }
+        انسخه والصقه بدل الـ object الفاضي تحت.
+     5) من Firestore > Rules، حط القاعدة دي عشان أي حد يقدر يقرأ ويكتب
+        (مناسب لموقع تعليمي بسيط بدون بيانات حساسة):
+           rules_version = '2';
+           service cloud.firestore {
+             match /databases/{database}/documents {
+               match /{document=**} { allow read, write: if true; }
+             }
+           }
+        (تنويه أمان: الباسورد بتاع لوحة التحكم بيتفحص في المتصفح بس،
+        فالقاعدة دي مفتوحة تقنيًا لأي حد يعرف يكتب مباشرة على Firestore.
+        كفاية لموقع محاضرات عادي، بس متحطش فيه بيانات حساسة فعلاً.)
+     6) احفظ الملف وارفعه لأي استضافة (Netlify / Vercel / GitHub Pages).
+
+     لو سبت الـ object فاضي زي ما هو، الموقع هيشتغل بس بشكل محلي في
+     متصفحك إنت بس (زي ما كان قبل كده)، من غير مزامنة مع باقي الزوار.
+  ===================================================================== */
+  const FIREBASE_CONFIG = {
+    // apiKey: "AIzaSy...",
+    // authDomain: "your-project.firebaseapp.com",
+    // projectId: "your-project",
+    // storageBucket: "your-project.appspot.com",
+    // messagingSenderId: "...",
+    // appId: "..."
+  };
+
+  let state = {
+    subjects: [],
+    videos: [],
+    pdfs: [],
+    students: [],
+    settings: { passwordHash: null }
+  };
+  let db = null;
+  let dbReady = false;
+  let adminUnlocked = false;
+  let authError = "";
+  let currentStudent = null; // {id, name, email}
+
+  function defaultData(){
+    return { subjects: [], videos: [], pdfs: [], students: [], settings: { passwordHash: null }, watched: {} };
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function byOrder(arr){ return [...arr].sort((a,b) => (a.order||0) - (b.order||0)); }
+  function reorder(list, id, dir){
+    const sorted = byOrder(list);
+    const idx = sorted.findIndex(x => x.id === id);
+    const j = idx + (dir === "up" ? -1 : 1);
+    if (idx < 0 || j < 0 || j >= sorted.length) return;
+    const a = sorted[idx], b = sorted[j];
+    const tmp = a.order || 0; a.order = b.order || 0; b.order = tmp;
+    persist(); render();
+  }
+
+  /* ---------------- progress tracking ---------------- */
+  function isWatched(itemId){
+    return !!(currentStudent && state.watched[currentStudent.id] && state.watched[currentStudent.id][itemId]);
+  }
+  function toggleWatched(itemId){
+    if (!currentStudent) return;
+    state.watched[currentStudent.id] = state.watched[currentStudent.id] || {};
+    if (state.watched[currentStudent.id][itemId]) delete state.watched[currentStudent.id][itemId];
+    else state.watched[currentStudent.id][itemId] = true;
+    persist(); render();
+  }
+  function watchedCount(ids){
+    if (!currentStudent || !state.watched[currentStudent.id]) return 0;
+    const mine = state.watched[currentStudent.id];
+    return ids.filter(id => mine[id]).length;
+  }
+
+  async function hashPassword(pw){
+    const enc = new TextEncoder().encode(pw);
+    const digest = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function loadLocal(){
+    try { const raw = localStorage.getItem(LOCAL_KEY); return raw ? Object.assign(defaultData(), JSON.parse(raw)) : defaultData(); }
+    catch(e){ return defaultData(); }
+  }
+  function saveLocal(data){ try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch(e){} }
+
+  async function persist(){
+    if (db && dbReady) {
+      try { await db.doc(DOC_PATH).set(state); }
+      catch(e){ console.warn("db write failed, saving locally", e); saveLocal(state); }
+    } else { saveLocal(state); }
+  }
+
+  function firebaseConfigured(){
+    return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+  }
+
+  async function initData(){
+    state = loadLocal();
+    restoreSession();
+    render();
+
+    if (!firebaseConfigured() || typeof firebase === "undefined") {
+      db = null;
+      updateSyncIndicator(false);
+      return;
+    }
+
+    try {
+      const app = firebase.apps && firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore(app);
+    } catch(e){ console.warn("firebase init failed", e); db = null; }
+
+    if (db) {
+      try {
+        db.doc(DOC_PATH).onSnapshot((snap) => {
+          if (snap && snap.exists) state = Object.assign(defaultData(), snap.data());
+          else if (!dbReady) state = loadLocal();
+          dbReady = true;
+          restoreSession();
+          updateSyncIndicator(true);
+          render();
+        }, (err) => { console.warn("db subscribe error", err); updateSyncIndicator(false); });
+      } catch(e){ console.warn("db subscribe failed", e); updateSyncIndicator(false); }
+    } else { updateSyncIndicator(false); }
+  }
+
+  function restoreSession(){
+    try {
+      const sid = sessionStorage.getItem(SESSION_KEY);
+      if (!sid) { currentStudent = null; return; }
+      const s = state.students.find(x => x.id === sid && x.status === "approved");
+      currentStudent = s ? { id: s.id, name: s.name, email: s.email } : null;
+      if (!s) sessionStorage.removeItem(SESSION_KEY);
+    } catch(e){ currentStudent = null; }
+  }
+
+  function updateSyncIndicator(on){
+    const el = document.getElementById("syncDot");
+    const label = document.getElementById("syncLabel");
+    if (!el) return;
+    el.classList.toggle("off", !on);
+    if (label) label.textContent = on
+      ? tr("متصل — التغييرات تظهر لكل زوار المنصة", "Connected — changes are visible to everyone")
+      : tr("غير متصل بالتخزين المشترك — التغييرات هنا فقط", "Not connected to shared storage — local only");
+  }
+
+  /* ---------------- smart multi-platform media detection ---------------- */
+  function extractDriveId(url){
+    if (!url) return null;
+    const patterns = [
+      /\/file\/d\/([a-zA-Z0-9_-]{10,})/,
+      /\/d\/([a-zA-Z0-9_-]{10,})/,
+      /[?&]id=([a-zA-Z0-9_-]{10,})/,
+      /\/folders\/([a-zA-Z0-9_-]{10,})/
+    ];
+    for (const p of patterns){ const m = url.match(p); if (m) return m[1]; }
+    return null;
+  }
+
+  // Detects the platform / file type behind a link and returns how to render it.
+  // kind: "iframe" | "video" | "audio" | "image" | "pdf"
+  function detectMedia(url){
+    if (!url) return null;
+    const clean = String(url).trim();
+    if (!/^https?:\/\//i.test(clean)) return null;
+
+    // YouTube (watch / youtu.be / shorts / already-embed links)
+    let m = clean.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/i);
+    if (m) return { kind: "iframe", embed: `https://www.youtube.com/embed/${m[1]}`, platform: "youtube", label: "YouTube" };
+
+    // Vimeo
+    m = clean.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+    if (m) return { kind: "iframe", embed: `https://player.vimeo.com/video/${m[1]}`, platform: "vimeo", label: "Vimeo" };
+
+    // Dailymotion
+    m = clean.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/i) || clean.match(/dai\.ly\/([a-zA-Z0-9]+)/i);
+    if (m) return { kind: "iframe", embed: `https://www.dailymotion.com/embed/video/${m[1]}`, platform: "dailymotion", label: "Dailymotion" };
+
+    // Facebook video (watch links, page videos, fb.watch short links)
+    if (/facebook\.com\/.*\/videos\//i.test(clean) || /fb\.watch\//i.test(clean) || /facebook\.com\/watch\/?\?/i.test(clean)) {
+      return { kind: "iframe", embed: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(clean)}&show_text=0`, platform: "facebook", label: "Facebook" };
+    }
+
+    // Google Drive (video or PDF preview)
+    const driveId = extractDriveId(clean);
+    if (driveId) return { kind: "iframe", embed: `https://drive.google.com/file/d/${driveId}/preview`, platform: "drive", label: "Drive" };
+
+    // Direct file links, detected by extension
+    const path = clean.split(/[?#]/)[0].toLowerCase();
+    if (/\.(mp4|webm|ogv|mov|m4v)$/.test(path)) return { kind: "video", src: clean, platform: "direct", label: tr("فيديو مباشر", "Direct video") };
+    if (/\.(mp3|wav|m4a|aac|oga|opus)$/.test(path)) return { kind: "audio", src: clean, platform: "direct", label: tr("صوت", "Audio") };
+    if (/\.pdf$/.test(path)) return { kind: "pdf", src: clean, platform: "direct", label: "PDF" };
+    if (/\.(jpe?g|png|gif|webp|svg|bmp)$/.test(path)) return { kind: "image", src: clean, platform: "direct", label: tr("صورة", "Image") };
+
+    // Fallback: try to embed the raw URL in an iframe (works for many pages/players)
+    return { kind: "iframe", embed: clean, platform: "generic", label: tr("رابط", "Link") };
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+  function isValidEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  /* ---------------- ring icon (progress ring + subject tile) ---------------- */
+  function ringIcon(color, name, pct, size){
+    const stroke = size <= 36 ? 2.2 : 2.6;
+    const r = (size - stroke * 2) / 2;
+    const c = 2 * Math.PI * r;
+    const p = Math.max(0, Math.min(100, pct || 0));
+    const off = (c * (1 - p / 100)).toFixed(1);
+    const fs = Math.round(size * 0.36);
+    const initials = escapeHtml(String(name || "").slice(0, 2));
+    return `<div class="ring-wrap" style="width:${size}px;height:${size}px">
+      <svg class="ring-svg" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+        <circle class="ring-track" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${stroke}"/>
+        ${p > 0 ? `<circle class="ring-fill" cx="${size/2}" cy="${size/2}" r="${r.toFixed(2)}" stroke="${color}" stroke-width="${stroke}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off}"/>` : ""}
+      </svg>
+      <div class="ring-icon-inner" style="background:${color}22;color:${color};font-size:${fs}px">${initials}</div>
+    </div>`;
+  }
+
+  /* ---------------- toasts ---------------- */
+  function showToast(msg, type){
+    const root = document.getElementById("toastRoot");
+    if (!root) return;
+    const el = document.createElement("div");
+    el.className = "toast" + (type === "err" ? " err" : "");
+    el.textContent = msg;
+    root.appendChild(el);
+    setTimeout(() => {
+      el.classList.add("out");
+      setTimeout(() => el.remove(), 220);
+    }, 2600);
+  }
+
+  /* ---------------- confirm dialog ---------------- */
+  function confirmAction(message, onConfirm){
+    const root = document.getElementById("confirmRoot");
+    root.innerHTML = `
+      <div class="modal-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+          <p>${escapeHtml(message)}</p>
+          <div class="confirm-actions">
+            <button class="ghost-btn" id="confirmCancel">${tr("إلغاء", "Cancel")}</button>
+            <button class="danger-btn" id="confirmOk">${tr("تأكيد الحذف", "Confirm")}</button>
+          </div>
+        </div>
+      </div>`;
+    const close = () => { root.innerHTML = ""; };
+    document.getElementById("confirmCancel").addEventListener("click", close);
+    document.getElementById("confirmOverlay").addEventListener("click", (e) => { if (e.target.id === "confirmOverlay") close(); });
+    document.getElementById("confirmOk").addEventListener("click", () => { close(); onConfirm(); });
+  }
+
+  /* ---------------- routing ---------------- */
+  let route = { mode: "home", subjectId: null, tab: "videos" };
+  let authTab = "login"; // login | signup
+  let authNotice = "";
+
+  function goHome(){ route = { mode: "home", subjectId: null, tab: "videos" }; searchQuery = ""; closeMobileNav(); render(); }
+  function goSubject(id, tab){ route = { mode: "subject", subjectId: id, tab: tab || "videos" }; searchQuery = ""; closeMobileNav(); render(); }
+  function goAdmin(){ route = { mode: "admin" }; authError = ""; closeMobileNav(); render(); }
+  function closeMobileNav(){ document.getElementById("sidebar").classList.remove("open"); document.getElementById("scrim").classList.remove("open"); }
+
+  /* ---------------- search box ---------------- */
+  function renderSearchBox(){
+    const wrap = document.getElementById("searchWrap");
+    if (!wrap) return;
+    if (!currentStudent || route.mode === "admin"){ wrap.innerHTML = ""; return; }
+    wrap.innerHTML = `
+      <div class="search-box">
+        <input type="text" id="globalSearch" placeholder="${tr("دوّر على فيديو أو ملف...", "Search videos or files...")}" value="${escapeHtml(searchQuery)}">
+        <span class="search-ic">${ICO.search}</span>
+      </div>`;
+    const input = document.getElementById("globalSearch");
+    input.addEventListener("input", () => {
+      searchQuery = input.value;
+      if (searchQuery.trim()){
+        route = { mode: "search" };
+        const view = document.getElementById("view");
+        view.innerHTML = searchView();
+        attachViewHandlers();
+      } else if (route.mode === "search"){
+        goHome();
+      }
+    });
+    input.addEventListener("keydown", (e) => { if (e.key === "Escape"){ searchQuery = ""; goHome(); } });
+  }
+
+  /* ---------------- sidebar ---------------- */
+  function renderSidebar(){
+    const list = document.getElementById("subjectNavList");
+    if (!currentStudent && route.mode !== "admin"){
+      list.innerHTML = `<div class="empty-side-note">${tr("سجّل دخولك عشان تشوف المواد", "Sign in to view the subjects")}</div>`;
+    } else if (state.subjects.length === 0){
+      list.innerHTML = `<div class="empty-side-note">${tr("لسه مفيش مواد مضافة", "No subjects added yet")}</div>`;
+    } else {
+      list.innerHTML = byOrder(state.subjects).map(s => {
+        const vCount = state.videos.filter(v => v.subjectId === s.id).length;
+        const pCount = state.pdfs.filter(p => p.subjectId === s.id).length;
+        const active = route.mode === "subject" && route.subjectId === s.id;
+        return `
+          <button class="subject-link ${active ? "active" : ""}" data-nav-subject="${s.id}">
+            <span class="subject-dot" style="background:${s.color};color:${s.color}"></span>
+            <span>${escapeHtml(s.name)}</span>
+            <span class="count">${vCount + pCount}</span>
+          </button>`;
+      }).join("");
+      list.querySelectorAll("[data-nav-subject]").forEach(btn => {
+        btn.addEventListener("click", () => goSubject(btn.getAttribute("data-nav-subject")));
+      });
+    }
+
+    const foot = document.getElementById("sidebarFoot");
+    let footHtml = "";
+    if (currentStudent){
+      footHtml += `<div class="who-chip"><span class="dot"></span><span>${escapeHtml(currentStudent.name)}</span></div>`;
+      footHtml += `<button class="ghost-btn icon-flip" id="studentLogoutBtn">${ICO.logout} ${tr("تسجيل خروج", "Sign out")}</button>`;
+    }
+    footHtml += `<button class="ghost-btn ${route.mode === "admin" ? "active-mode" : ""}" id="adminToggle">${ICO.gear} ${tr("لوحة التحكم", "Admin panel")}</button>`;
+    foot.innerHTML = footHtml;
+    document.getElementById("adminToggle").addEventListener("click", goAdmin);
+    const slb = document.getElementById("studentLogoutBtn");
+    if (slb) slb.addEventListener("click", () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      currentStudent = null;
+      goHome();
+    });
+  }
+
+  /* ---------------- render ---------------- */
+  function render(){
+    applyDocLang();
+    applyTheme();
+    renderSidebar();
+    const view = document.getElementById("view");
+
+    if (route.mode === "admin"){
+      view.innerHTML = adminView();
+    } else if (!currentStudent){
+      view.innerHTML = studentAuthView();
+    } else if (route.mode === "subject"){
+      view.innerHTML = subjectView(route.subjectId, route.tab);
+    } else if (route.mode === "search"){
+      view.innerHTML = searchView();
+    } else {
+      view.innerHTML = homeView();
+    }
+    renderSearchBox();
+    attachViewHandlers();
+    updateSyncIndicator(!!(db && dbReady));
+    if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise([view]).catch(() => {}); }
+  }
+
+  /* ---------------- student auth view ---------------- */
+  function studentAuthView(){
+    const isLogin = authTab === "login";
+    return `
+      <div class="auth-shell">
+        <div class="auth-card">
+          <div class="auth-brand"><div class="brand-mark">${ICO.wave}</div><strong>${tr("تردد", "Taraddud")}</strong></div>
+          <div class="auth-tabs">
+            <button class="auth-tab ${isLogin ? "active" : ""}" data-auth-tab="login">${tr("تسجيل دخول", "Sign in")}</button>
+            <button class="auth-tab ${!isLogin ? "active" : ""}" data-auth-tab="signup">${tr("إنشاء حساب", "Create account")}</button>
+          </div>
+          <h2>${isLogin ? tr("أهلاً بيك تاني", "Welcome back") : tr("انضم للمنصة", "Join the platform")}</h2>
+          <p class="sub-desc">${isLogin
+            ? tr("سجّل دخولك عشان توصل لكل المحاضرات والملفات", "Sign in to access all lectures and files")
+            : tr("سجّل بياناتك واستنى موافقة المشرف عشان تقدر تدخل", "Register your details and wait for admin approval to sign in")}</p>
+
+          ${authError ? `<div class="auth-error">${escapeHtml(authError)}</div>` : ""}
+          ${authNotice ? `<div class="auth-ok">${escapeHtml(authNotice)}</div>` : ""}
+
+          ${isLogin ? `
+            <div class="field"><label>${tr("البريد الإلكتروني", "Email")}</label><input type="email" id="loginEmail" placeholder="name@example.com"></div>
+            <div class="field"><label>${tr("الباسورد", "Password")}</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+            <button class="primary-btn" id="studentLoginBtn">${tr("دخول", "Sign in")}</button>
+          ` : `
+            <div class="field"><label>${tr("الاسم بالكامل", "Full name")}</label><input type="text" id="suName" placeholder="${tr("محمد أحمد", "Jane Doe")}"></div>
+            <div class="field"><label>${tr("البريد الإلكتروني", "Email")}</label><input type="email" id="suEmail" placeholder="name@example.com"></div>
+            <div class="field"><label>${tr("الباسورد", "Password")}</label><input type="password" id="suPassword" placeholder="${tr("6 حروف على الأقل", "at least 6 characters")}"></div>
+            <button class="primary-btn" id="studentSignupBtn">${tr("إنشاء الحساب", "Create account")}</button>
+          `}
+          <div class="auth-note">${tr("لوحة تحكم المشرف؟", "Are you the admin?")} <a href="javascript:void(0)" id="goAdminLink" style="color:var(--accent-a);font-weight:600;">${tr("من هنا", "click here")}</a></div>
+        </div>
+      </div>`;
+  }
+
+  /* ---------------- home / subject views ---------------- */
+  function homeView(){
+    const cards = byOrder(state.subjects).map(s => {
+      const vCount = state.videos.filter(v => v.subjectId === s.id).length;
+      const pCount = state.pdfs.filter(p => p.subjectId === s.id).length;
+      const ids = [...state.videos.filter(v => v.subjectId === s.id), ...state.pdfs.filter(p => p.subjectId === s.id)].map(i => i.id);
+      const pct = ids.length ? Math.round((watchedCount(ids) / ids.length) * 100) : 0;
+      return `
+        <div class="subject-card" data-open-subject="${s.id}">
+          ${ringIcon(s.color, s.name, pct, 40)}
+          <h3>${escapeHtml(s.name)}</h3>
+          <div class="subject-meta"><span>${vCount} ${tr("فيديو", "videos")}</span><span>${pCount} PDF</span></div>
+        </div>`;
+    }).join("");
+
+    const gridOrEmpty = state.subjects.length
+      ? `<div class="subject-grid">${cards}</div>`
+      : `<div class="empty-state"><strong>${tr("لسه مفيش مواد مضافة", "No subjects yet")}</strong>${tr("افتح لوحة التحكم وضيف أول مادة", "Open the admin panel to add the first subject")}</div>`;
+
+    const inProgress = byOrder(state.subjects).map(s => {
+      const ids = [...state.videos.filter(v => v.subjectId === s.id), ...state.pdfs.filter(p => p.subjectId === s.id)].map(i => i.id);
+      const done = watchedCount(ids);
+      return { s, done, total: ids.length, pct: ids.length ? Math.round((done/ids.length)*100) : 0 };
+    }).filter(x => x.total > 0 && x.done > 0 && x.done < x.total).slice(0, 4);
+
+    const continueHtml = inProgress.length ? `
+      <div class="continue-section">
+        <h3>${tr("كمّل من وقفت", "Continue where you left off")}</h3>
+        <div class="continue-grid">
+          ${inProgress.map(x => `
+            <div class="continue-card" data-open-subject="${x.s.id}">
+              ${ringIcon(x.s.color, x.s.name, x.pct, 44)}
+              <div class="cc-info">
+                <div class="cc-name">${escapeHtml(x.s.name)}</div>
+                <div class="cc-count">${x.done}/${x.total} · ${x.pct}%</div>
+              </div>
+            </div>`).join("")}
+        </div>
+      </div>` : "";
+
+    return `
+      <div class="hero">
+        <p class="kicker">${tr("قسم هندسة الاتصالات والحاسبات", "Communications & Computers Engineering")}</p>
+        <h2>${tr("كل شرح القسم", "Every lecture,")} <span class="grad-text">${tr("في مكان واحد", "in one place")}</span></h2>
+        <p>${tr("فيديوهات المحاضرات وملفات الـPDF مقسّمة على المواد، بتتشغل هنا مباشرة من غير ما تفتح جوجل درايڤ كل مرة.", "Lecture videos and PDFs organized by subject, playable right here without opening Google Drive every time.")}</p>
+        <svg class="hero-wave" viewBox="0 0 400 56" fill="none" aria-hidden="true" preserveAspectRatio="none">
+          <path class="w2" d="M0.0,28.0 Q6.2,25.4 9.3,25.3 Q12.5,25.2 15.7,25.6 Q18.8,26.1 21.9,27.1 Q25.0,28.1 28.1,29.4 Q31.2,30.7 34.4,31.9 Q37.5,33.1 40.6,34.0 Q43.8,34.8 46.9,35.0 Q50.0,35.2 53.1,34.7 Q56.2,34.2 59.4,33.0 Q62.5,31.7 65.7,29.9 Q68.8,28.2 71.9,26.3 Q75.0,24.4 78.1,22.7 Q81.2,21.0 84.3,19.9 Q87.5,18.8 90.7,18.6 Q93.8,18.3 96.9,19.1 Q100.0,19.8 103.1,21.4 Q106.2,22.9 109.3,25.0 Q112.5,27.2 115.7,29.5 Q118.8,31.9 121.9,33.9 Q125.0,35.9 128.1,37.2 Q131.2,38.6 134.3,38.9 Q137.5,39.2 140.7,38.4 Q143.8,37.6 146.9,35.9 Q150.0,34.2 153.1,31.8 Q156.2,29.4 159.3,26.9 Q162.5,24.3 165.7,22.1 Q168.8,19.8 171.9,18.4 Q175.0,16.9 178.1,16.5 Q181.2,16.1 184.3,16.9 Q187.5,17.6 190.7,19.4 Q193.8,21.1 196.9,23.6 Q200.0,26.0 203.1,28.6 Q206.2,31.2 209.3,33.5 Q212.5,35.8 215.7,37.3 Q218.8,38.9 221.9,39.4 Q225.0,39.9 228.1,39.2 Q231.2,38.6 234.3,36.9 Q237.5,35.2 240.7,32.9 Q243.8,30.5 246.9,28.0 Q250.0,25.5 253.1,23.2 Q256.2,21.0 259.4,19.4 Q262.5,17.9 265.6,17.4 Q268.8,16.9 271.9,17.4 Q275.0,18.0 278.1,19.5 Q281.2,21.0 284.4,23.1 Q287.5,25.2 290.6,27.5 Q293.8,29.8 296.9,31.8 Q300.0,33.8 303.1,35.2 Q306.2,36.6 309.4,37.0 Q312.5,37.5 315.6,37.0 Q318.8,36.6 321.9,35.4 Q325.0,34.2 328.1,32.5 Q331.2,30.7 334.4,28.9 Q337.5,27.0 340.6,25.4 Q343.8,23.8 346.9,22.8 Q350.0,21.7 353.1,21.4 Q356.2,21.1 359.4,21.5 Q362.5,21.9 365.6,22.8 Q368.8,23.7 371.9,24.9 Q375.0,26.1 378.1,27.2 Q381.2,28.3 384.4,29.1 Q387.5,29.9 390.6,30.0 Q393.8,30.2 396.9,29.1 L400.0,28.0" stroke-width="1.3" stroke-linecap="round"/>
+          <path class="w1" d="M0.0,28.0 Q6.2,26.6 9.3,25.5 Q12.5,24.3 15.7,23.6 Q18.8,22.9 21.9,23.2 Q25.0,23.6 28.1,25.1 Q31.2,26.6 34.4,28.9 Q37.5,31.1 40.6,33.2 Q43.8,35.4 46.9,36.5 Q50.0,37.6 53.1,37.1 Q56.2,36.6 59.4,34.4 Q62.5,32.2 65.7,29.0 Q68.8,25.7 71.9,22.5 Q75.0,19.3 78.1,17.4 Q81.2,15.4 84.3,15.5 Q87.5,15.6 90.7,17.9 Q93.8,20.3 96.9,24.1 Q100.0,28.0 103.1,32.1 Q106.2,36.2 109.3,39.2 Q112.5,42.1 115.7,42.7 Q118.8,43.3 121.9,41.3 Q125.0,39.3 128.1,35.2 Q131.2,31.2 134.3,26.4 Q137.5,21.7 140.7,17.9 Q143.8,14.0 146.9,12.4 Q150.0,10.9 153.1,12.2 Q156.2,13.6 159.3,17.4 Q162.5,21.3 165.7,26.4 Q168.8,31.4 171.9,36.0 Q175.0,40.6 178.1,43.0 Q181.2,45.5 184.3,45.0 Q187.5,44.6 190.7,41.3 Q193.8,38.0 196.9,33.0 Q200.0,28.0 203.1,23.0 Q206.2,18.0 209.3,14.7 Q212.5,11.4 215.7,10.9 Q218.8,10.5 221.9,12.9 Q225.0,15.4 228.1,20.0 Q231.2,24.6 234.3,29.7 Q237.5,34.7 240.7,38.5 Q243.8,42.4 246.9,43.8 Q250.0,45.1 253.1,43.5 Q256.2,42.0 259.4,38.1 Q262.5,34.3 265.6,29.5 Q268.8,24.8 271.9,20.8 Q275.0,16.7 278.1,14.7 Q281.2,12.7 284.4,13.3 Q287.5,13.9 290.6,16.9 Q293.8,19.8 296.9,23.9 Q300.0,28.0 303.1,31.9 Q306.2,35.7 309.4,38.0 Q312.5,40.4 315.6,40.5 Q318.8,40.6 321.9,38.7 Q325.0,36.7 328.1,33.5 Q331.2,30.3 334.4,27.1 Q337.5,23.8 340.6,21.6 Q343.8,19.4 346.9,18.9 Q350.0,18.4 353.1,19.5 Q356.2,20.6 359.4,22.8 Q362.5,24.9 365.6,27.1 Q368.8,29.4 371.9,30.9 Q375.0,32.4 378.1,32.8 Q381.2,33.1 384.4,32.4 Q387.5,31.7 390.6,30.5 Q393.8,29.4 396.9,28.7 L400.0,28.0" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      ${continueHtml}
+      ${gridOrEmpty}
+    `;
+  }
+
+  function subjectView(subjectId, tab){
+    const subject = state.subjects.find(s => s.id === subjectId);
+    if (!subject) return `<div class="empty-state"><strong>${tr("المادة مش موجودة", "Subject not found")}</strong></div>`;
+    const videos = byOrder(state.videos.filter(v => v.subjectId === subjectId));
+    const pdfs = byOrder(state.pdfs.filter(p => p.subjectId === subjectId));
+    const allIds = [...videos, ...pdfs].map(i => i.id);
+    const done = watchedCount(allIds);
+    const pct = allIds.length ? Math.round((done / allIds.length) * 100) : 0;
+
+    const listHtml = tab === "videos"
+      ? (videos.length ? `<div class="content-grid">${videos.map(v => itemCard(v, "video")).join("")}</div>`
+          : `<div class="empty-state"><strong>${tr("مفيش فيديوهات لسه", "No videos yet")}</strong>${tr("هتظهر هنا أول ما المشرف يضيفها", "They'll show up here once the admin adds them")}</div>`)
+      : (pdfs.length ? `<div class="content-grid">${pdfs.map(p => itemCard(p, "pdf")).join("")}</div>`
+          : `<div class="empty-state"><strong>${tr("مفيش ملفات PDF لسه", "No PDF files yet")}</strong>${tr("هتظهر هنا أول ما المشرف يضيفها", "They'll show up here once the admin adds them")}</div>`);
+
+    return `
+      <div class="subject-header">
+        ${ringIcon(subject.color, subject.name, pct, 52)}
+        <div><h2>${escapeHtml(subject.name)}</h2><div class="sub">${videos.length} ${tr("فيديو", "videos")} · ${pdfs.length} PDF</div></div>
+      </div>
+      ${allIds.length ? `
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label">${done}/${allIds.length} · ${pct}%</div>
+      </div>` : ""}
+      <div class="tabs">
+        <button class="tab-btn ${tab === "videos" ? "active" : ""}" data-tab="videos">${tr("الفيديوهات", "Videos")}</button>
+        <button class="tab-btn ${tab === "pdfs" ? "active" : ""}" data-tab="pdfs">${tr("ملفات PDF", "PDF files")}</button>
+      </div>
+      ${listHtml}
+    `;
+  }
+
+  /* ---------------- search ---------------- */
+  let searchQuery = "";
+  function searchView(){
+    const q = searchQuery.trim().toLowerCase();
+    const subjById = Object.fromEntries(state.subjects.map(s => [s.id, s]));
+    const matchVideos = state.videos.filter(v => v.title.toLowerCase().includes(q)).map(v => ({ item: v, type: "video" }));
+    const matchPdfs = state.pdfs.filter(p => p.title.toLowerCase().includes(q)).map(p => ({ item: p, type: "pdf" }));
+    const results = [...matchVideos, ...matchPdfs];
+
+    const grid = results.length
+      ? `<div class="content-grid">${results.map(r => itemCard(r.item, r.type, subjById[r.item.subjectId] ? subjById[r.item.subjectId].name : "", subjById[r.item.subjectId] ? subjById[r.item.subjectId].color : "")).join("")}</div>`
+      : `<div class="empty-state"><strong>${tr("مفيش نتائج", "No results")}</strong>${tr("جرب كلمة تانية", "Try a different search term")}</div>`;
+
+    return `
+      <div class="hero" style="padding-bottom:22px;">
+        <p class="kicker">${tr("نتائج البحث", "Search results")}</p>
+        <h2>"${escapeHtml(searchQuery)}"</h2>
+      </div>
+      ${grid}
+    `;
+  }
+
+  function itemCard(item, type, subjectName, subjectColor){
+    const icon = type === "video" ? ICO.play : ICO.doc;
+    const typeLabel = type === "video" ? tr("فيديو شرح", "Lecture video") : tr("ملف PDF", "PDF file");
+    const watched = isWatched(item.id);
+    return `
+      <div class="item-card" data-open-item="${item.id}" data-open-type="${type}">
+        <div class="item-thumb">${subjectColor ? `<span class="thumb-accent" style="background:${subjectColor}"></span>` : ""}${icon}</div>
+        <div class="item-body">
+          ${subjectName ? `<div class="item-subject-tag">${escapeHtml(subjectName)}</div>` : ""}
+          <h4>${escapeHtml(item.title)}</h4>
+          <div class="item-type">
+            <span>${typeLabel}</span>
+            <button class="watch-toggle ${watched ? "done" : ""}" data-toggle-watch="${item.id}" title="${tr("علّم كمشاهد", "Mark as watched")}">${watched ? ICO.check : ""}</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ---------------- modal / smart media player ---------------- */
+  function openPlayer(item, type){
+    const media = detectMedia(item.driveLink);
+    const root = document.getElementById("modalRoot");
+    if (!media){
+      root.innerHTML = `
+        <div class="modal-overlay" id="modalOverlay">
+          <div class="modal-box">
+            <div class="modal-head"><h4>${escapeHtml(item.title)}</h4><button class="modal-close" id="modalClose">${ICO.close}</button></div>
+            <div style="padding:30px;color:var(--text-dim);font-size:14px;">${tr('تعذّر التعرف على نوع اللينك. اتأكد إنه رابط صحيح (يوتيوب، درايڤ، Vimeo، Dailymotion، فيسبوك، أو رابط ملف مباشر).', 'Could not recognize this link. Make sure it is a valid link (YouTube, Drive, Vimeo, Dailymotion, Facebook, or a direct file link).')}</div>
+          </div>
+        </div>`;
+      document.getElementById("modalClose").addEventListener("click", closePlayer);
+      document.getElementById("modalOverlay").addEventListener("click", (e) => { if (e.target.id === "modalOverlay") closePlayer(); });
+      return;
+    }
+
+    const watched = isWatched(item.id);
+    let wrapClass = "";
+    let mediaHtml = "";
+    let needsFallback = false;
+
+    if (media.kind === "video") {
+      mediaHtml = `<video id="playerFrame" controls autoplay playsinline src="${escapeHtml(media.src)}"></video>`;
+    } else if (media.kind === "audio") {
+      wrapClass = "audio-mode";
+      mediaHtml = `<audio id="playerFrame" controls autoplay src="${escapeHtml(media.src)}"></audio>`;
+    } else if (media.kind === "image") {
+      wrapClass = "image-mode";
+      mediaHtml = `<img id="playerFrame" src="${escapeHtml(media.src)}" alt="${escapeHtml(item.title)}">`;
+    } else if (media.kind === "pdf") {
+      wrapClass = "pdf";
+      mediaHtml = `<iframe src="${escapeHtml(media.src)}" id="playerFrame"></iframe>`;
+    } else {
+      wrapClass = type === "pdf" ? "pdf" : "";
+      mediaHtml = `<iframe src="${media.embed}" allow="autoplay; fullscreen" allowfullscreen id="playerFrame"></iframe>`;
+      needsFallback = true;
+    }
+
+    root.innerHTML = `
+      <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+          <div class="modal-head">
+            <h4>${escapeHtml(item.title)}</h4>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="ghost-btn" id="modalWatchToggle" style="padding:6px 12px;font-size:12px;${watched ? "border-color:var(--ok);color:var(--ok);" : ""}">${watched ? ICO.check + " " + tr("متشاهد", "Watched") : tr("علّم كمشاهد", "Mark as watched")}</button>
+              <button class="modal-close" id="modalClose">${ICO.close}</button>
+            </div>
+          </div>
+          <div class="modal-frame-wrap ${wrapClass}">
+            <span class="media-badge">${escapeHtml(media.label || media.platform)}</span>
+            ${mediaHtml}
+            ${needsFallback ? `
+            <div class="frame-fallback" id="frameFallback" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--bg-2,#111);color:var(--text-dim);text-align:center;padding:24px;">
+              <div style="font-size:13px;max-width:340px;">${tr('المحتوى مش بيظهر جوه الموقع؟ ده ممكن يكون بسبب صلاحيات المصدر. جرب تفتحه مباشرة:', 'Content not showing here? This can happen due to source permissions. Try opening it directly:')}</div>
+              <a class="primary-btn" style="width:auto;padding:9px 18px;" href="${escapeHtml(item.driveLink)}" target="_blank" rel="noopener noreferrer">${tr('فتح الرابط', 'Open the link')}</a>
+            </div>` : ""}
+          </div>
+          <div style="text-align:center;padding:8px 0 0;">
+            <a href="${escapeHtml(item.driveLink)}" target="_blank" rel="noopener noreferrer" style="font-size:11.5px;color:var(--text-faint);">${tr('مش شغال؟ افتحه من هنا في المصدر الأصلي', 'Not working? Open it here at the original source')}</a>
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById("modalWatchToggle").addEventListener("click", () => { toggleWatched(item.id); openPlayer(item, type); });
+
+    if (needsFallback) {
+      (function(){
+        const wrap = document.querySelector(".modal-frame-wrap");
+        const fb = document.getElementById("frameFallback");
+        if (wrap && fb) wrap.style.position = "relative";
+        // Some embeds (e.g. blocked Drive/Facebook shares) still "load" successfully with no error event,
+        // so we can't detect failure reliably via JS. If it looks stuck after a few seconds, surface the fallback.
+        let loaded = false;
+        const frame = document.getElementById("playerFrame");
+        if (frame) frame.addEventListener("load", () => { loaded = true; });
+        setTimeout(() => { if (!loaded && fb) fb.style.display = "flex"; }, 6000);
+      })();
+    }
+
+    // MathJax may be used in item titles (e.g. $E=mc^2$) — typeset after inserting the modal.
+    if (window.MathJax && window.MathJax.typesetPromise) { window.MathJax.typesetPromise([root]).catch(() => {}); }
+
+    document.getElementById("modalClose").addEventListener("click", closePlayer);
+    document.getElementById("modalOverlay").addEventListener("click", (e) => { if (e.target.id === "modalOverlay") closePlayer(); });
+  }
+  function closePlayer(){ document.getElementById("modalRoot").innerHTML = ""; }
+
+  /* ---------------- admin ---------------- */
+  function authGateView(){
+    const hasPassword = !!(state.settings && state.settings.passwordHash);
+    if (!hasPassword){
+      return `
+        <div class="admin-wrap"><div class="auth-shell" style="min-height:auto;padding:40px 0;"><div class="auth-card">
+          <h2>${tr("تأمين لوحة التحكم", "Secure the admin panel")}</h2>
+          <p class="sub-desc">${tr("دي أول مرة بتدخل بيها. حدد باسورد عشان بس المشرف يقدر يدير المحتوى والطلاب.", "This is your first time here. Set a password so only the admin can manage content and students.")}</p>
+          <div class="field"><label>${tr("باسورد جديد", "New password")}</label><input type="password" id="setupPw1" placeholder="${tr("6 حروف أو أكتر", "6+ characters")}"></div>
+          <div class="field"><label>${tr("تأكيد الباسورد", "Confirm password")}</label><input type="password" id="setupPw2"></div>
+          ${authError ? `<div class="auth-error">${escapeHtml(authError)}</div>` : ""}
+          <button class="primary-btn" id="setupPwBtn">${tr("تفعيل الحماية", "Activate protection")}</button>
+        </div></div></div>`;
+    }
+    return `
+      <div class="admin-wrap"><div class="auth-shell" style="min-height:auto;padding:40px 0;"><div class="auth-card">
+        <h2>${tr("لوحة التحكم محمية", "Admin panel is protected")}</h2>
+        <p class="sub-desc">${tr("اكتب الباسورد عشان تدخل", "Enter the password to continue")}</p>
+        <div class="field"><label>${tr("الباسورد", "Password")}</label><input type="password" id="loginPw" placeholder="••••••••"></div>
+        ${authError ? `<div class="auth-error">${escapeHtml(authError)}</div>` : ""}
+        <button class="primary-btn" id="loginBtn">${tr("دخول", "Sign in")}</button>
+      </div></div></div>`;
+  }
+
+  function adminView(){ return adminUnlocked ? adminDashboardContent() : authGateView(); }
+
+  function subjectOptionsHtml(selectedId){
+    return byOrder(state.subjects).map(s => `<option value="${s.id}" ${s.id === selectedId ? "selected" : ""}>${escapeHtml(s.name)}</option>`).join("");
+  }
+
+  function adminDashboardContent(){
+    const subjEditing = editingSubjectId ? state.subjects.find(s => s.id === editingSubjectId) : null;
+    const vidEditing = editingVideoId ? state.videos.find(v => v.id === editingVideoId) : null;
+    const pdfEditing = editingPdfId ? state.pdfs.find(p => p.id === editingPdfId) : null;
+    if (subjEditing) selectedColor = subjEditing.color;
+
+    const videoSubjectOptions = subjectOptionsHtml(vidEditing ? vidEditing.subjectId : null);
+    const pdfSubjectOptions = subjectOptionsHtml(pdfEditing ? pdfEditing.subjectId : null);
+    const pending = state.students.filter(s => s.status === "pending");
+    const others = state.students.filter(s => s.status !== "pending");
+
+    const sortedSubjects = byOrder(state.subjects);
+    const subjectsRows = sortedSubjects.map((s, i) => `
+      <div class="row-item">
+        <div class="reorder-btns">
+          <button class="move-btn" data-kind="subject" data-id="${s.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>${ICO.chevUp}</button>
+          <button class="move-btn" data-kind="subject" data-id="${s.id}" data-dir="down" ${i === sortedSubjects.length - 1 ? "disabled" : ""}>${ICO.chevDown}</button>
+        </div>
+        <span class="rdot" style="background:${s.color}"></span>
+        <div class="rmain"><div class="rt">${escapeHtml(s.name)}</div><div class="rs">${state.videos.filter(v=>v.subjectId===s.id).length} ${tr("فيديو","videos")} · ${state.pdfs.filter(p=>p.subjectId===s.id).length} PDF</div></div>
+        <div class="row-actions">
+          <button class="row-edit" data-edit-subject="${s.id}">${tr("تعديل","Edit")}</button>
+          <button class="row-del" data-del-subject="${s.id}">${tr("حذف","Delete")}</button>
+        </div>
+      </div>`).join("") || `<div class="empty-side-note">${tr("مفيش مواد لسه","No subjects yet")}</div>`;
+
+    const sortedVideos = byOrder(state.videos);
+    const videoRows = sortedVideos.map((v, i) => {
+      const subj = state.subjects.find(s => s.id === v.subjectId);
+      return `<div class="row-item">
+        <div class="reorder-btns">
+          <button class="move-btn" data-kind="video" data-id="${v.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>${ICO.chevUp}</button>
+          <button class="move-btn" data-kind="video" data-id="${v.id}" data-dir="down" ${i === sortedVideos.length - 1 ? "disabled" : ""}>${ICO.chevDown}</button>
+        </div>
+        <span class="rdot" style="background:${subj ? subj.color : "#888"}"></span>
+        <div class="rmain"><div class="rt">${escapeHtml(v.title)}</div><div class="rs">${subj ? escapeHtml(subj.name) : "—"}</div></div>
+        <div class="row-actions">
+          <button class="row-edit" data-edit-video="${v.id}">${tr("تعديل","Edit")}</button>
+          <button class="row-del" data-del-video="${v.id}">${tr("حذف","Delete")}</button>
+        </div></div>`;
+    }).join("") || `<div class="empty-side-note">${tr("مفيش فيديوهات مضافة","No videos yet")}</div>`;
+
+    const sortedPdfs = byOrder(state.pdfs);
+    const pdfRows = sortedPdfs.map((p, i) => {
+      const subj = state.subjects.find(s => s.id === p.subjectId);
+      return `<div class="row-item">
+        <div class="reorder-btns">
+          <button class="move-btn" data-kind="pdf" data-id="${p.id}" data-dir="up" ${i === 0 ? "disabled" : ""}>${ICO.chevUp}</button>
+          <button class="move-btn" data-kind="pdf" data-id="${p.id}" data-dir="down" ${i === sortedPdfs.length - 1 ? "disabled" : ""}>${ICO.chevDown}</button>
+        </div>
+        <span class="rdot" style="background:${subj ? subj.color : "#888"}"></span>
+        <div class="rmain"><div class="rt">${escapeHtml(p.title)}</div><div class="rs">${subj ? escapeHtml(subj.name) : "—"}</div></div>
+        <div class="row-actions">
+          <button class="row-edit" data-edit-pdf="${p.id}">${tr("تعديل","Edit")}</button>
+          <button class="row-del" data-del-pdf="${p.id}">${tr("حذف","Delete")}</button>
+        </div></div>`;
+    }).join("") || `<div class="empty-side-note">${tr("مفيش ملفات PDF مضافة","No PDFs yet")}</div>`;
+
+    const totalItems = state.videos.length + state.pdfs.length;
+    const approvedCount = state.students.filter(s => s.status === "approved").length;
+    const statsHtml = `
+      <div class="stat-grid">
+        <div class="stat-card"><div class="num">${state.subjects.length}</div><div class="lbl">${tr("مادة","Subjects")}</div></div>
+        <div class="stat-card"><div class="num">${state.videos.length}</div><div class="lbl">${tr("فيديو","Videos")}</div></div>
+        <div class="stat-card"><div class="num">${state.pdfs.length}</div><div class="lbl">PDF</div></div>
+        <div class="stat-card"><div class="num">${approvedCount}</div><div class="lbl">${tr("طالب مفعّل","Active students")}</div></div>
+        ${pending.length ? `<div class="stat-card"><div class="num" style="color:var(--warn)">${pending.length}</div><div class="lbl">${tr("طلبات معلّقة","Pending requests")}</div></div>` : ""}
+      </div>`;
+
+    const pendingRows = pending.map(s => `
+      <div class="row-item">
+        <span class="status-pill pending">${tr("قيد المراجعة","pending")}</span>
+        <div class="rmain"><div class="rt">${escapeHtml(s.name)}</div><div class="rs">${escapeHtml(s.email)}</div></div>
+        <div class="row-actions">
+          <button class="row-act accept" data-approve-student="${s.id}">${tr("قبول","Accept")}</button>
+          <button class="row-act reject" data-reject-student="${s.id}">${tr("رفض","Reject")}</button>
+        </div>
+      </div>`).join("") || `<div class="empty-side-note">${tr("مفيش طلبات جديدة","No pending requests")}</div>`;
+
+    const otherRows = others.map(s => `
+      <div class="row-item">
+        <span class="status-pill ${s.status}">${s.status === "approved" ? tr("مقبول","approved") : tr("مرفوض","rejected")}</span>
+        <div class="rmain"><div class="rt">${escapeHtml(s.name)}</div><div class="rs">${escapeHtml(s.email)}</div></div>
+        <button class="row-del" data-del-student="${s.id}">${tr("حذف","Remove")}</button>
+      </div>`).join("");
+
+    return `
+      <div class="admin-wrap">
+        <div class="admin-head">
+          <div><h2>${tr("لوحة التحكم","Admin panel")}</h2><p>${tr("أدر المواد والمحتوى وطلبات تسجيل الطلاب","Manage subjects, content and student sign-up requests")}</p></div>
+          <button class="ghost-btn icon-flip" id="logoutBtn">${ICO.logout} ${tr("تسجيل خروج","Sign out")}</button>
+        </div>
+
+        ${statsHtml}
+        <div class="sync-note"><span class="sync-dot" id="syncDot"></span><span id="syncLabel"></span></div>
+
+        <div class="panel">
+          <h3>${tr("طلبات تسجيل الطلاب","Student sign-up requests")} ${pending.length ? `<span class="badge">${pending.length}</span>` : ""}</h3>
+          <p class="panel-desc">${tr("اقبل أو ارفض طلبات الطلبة اللي عملوا حساب على المنصة","Accept or reject students who created an account")}</p>
+          <div class="row-list">${pendingRows}</div>
+          ${otherRows ? `<div class="row-list" style="margin-top:14px;">${otherRows}</div>` : ""}
+        </div>
+
+        <div class="panel ${subjEditing ? "editing" : ""}">
+          <h3>${subjEditing ? tr("تعديل المادة","Edit subject") : tr("إضافة مادة جديدة","Add a new subject")}${subjEditing ? `<span class="edit-badge">${tr("تعديل","editing")}</span>` : ""}</h3>
+          <p class="panel-desc">${tr("اختار اسم المادة ولون مميز ليها","Choose a name and an accent color")}</p>
+          <div class="field-row">
+            <div class="field"><label>${tr("اسم المادة","Subject name")}</label><input type="text" id="newSubjectName" value="${subjEditing ? escapeHtml(subjEditing.name) : ""}" placeholder="${tr("مثال: نظم الاتصالات الرقمية","e.g. Digital Communication Systems")}"></div>
+          </div>
+          <div class="field-row"><div class="field"><label>${tr("اللون","Color")}</label><div class="color-swatches" id="colorSwatches">${PALETTE.map(c => `<span class="swatch ${c === selectedColor ? "selected" : ""}" data-color="${c}" style="background:${c}"></span>`).join("")}</div></div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="primary-btn" id="addSubjectBtn" style="width:auto;">${subjEditing ? tr("تحديث المادة","Update subject") : tr("إضافة المادة","Add subject")}</button>
+            ${subjEditing ? `<button class="ghost-btn" id="cancelSubjectEdit" style="width:auto;">${tr("إلغاء","Cancel")}</button>` : ""}
+          </div>
+          <div class="row-list">${subjectsRows}</div>
+        </div>
+
+        <div class="panel ${vidEditing ? "editing" : ""}">
+          <h3>${vidEditing ? tr("تعديل الفيديو","Edit video") : tr("إضافة فيديو","Add a video")}${vidEditing ? `<span class="edit-badge">${tr("تعديل","editing")}</span>` : ""}</h3>
+          <p class="panel-desc">${tr('الصق رابط الفيديو — يوتيوب (عادي أو Shorts)، جوجل درايڤ، Vimeo، Dailymotion، فيسبوك، أو رابط ملف مباشر (MP4/WebM)', 'Paste the video link — YouTube (regular or Shorts), Google Drive, Vimeo, Dailymotion, Facebook, or a direct file link (MP4/WebM)')}</p>
+          <div class="field-row">
+            <div class="field"><label>${tr("المادة","Subject")}</label><select id="videoSubjectSelect">${videoSubjectOptions || `<option value="">${tr("أضف مادة أولاً","Add a subject first")}</option>`}</select></div>
+            <div class="field"><label>${tr("عنوان الفيديو","Video title")}</label><input type="text" id="videoTitle" value="${vidEditing ? escapeHtml(vidEditing.title) : ""}" placeholder="${tr("مثال: محاضرة 1","e.g. Lecture 1")}"></div>
+          </div>
+          <div class="field-row"><div class="field"><label>${tr("رابط الفيديو","Video link")}</label><input type="text" id="videoLink" value="${vidEditing ? escapeHtml(vidEditing.driveLink) : ""}" placeholder="YouTube / Drive / Vimeo / Dailymotion / Facebook / *.mp4"></div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="primary-btn" id="addVideoBtn" style="width:auto;" ${state.subjects.length ? "" : "disabled"}>${vidEditing ? tr("تحديث الفيديو","Update video") : tr("إضافة الفيديو","Add video")}</button>
+            ${vidEditing ? `<button class="ghost-btn" id="cancelVideoEdit" style="width:auto;">${tr("إلغاء","Cancel")}</button>` : ""}
+          </div>
+          <div class="row-list">${videoRows}</div>
+        </div>
+
+        <div class="panel ${pdfEditing ? "editing" : ""}">
+          <h3>${pdfEditing ? tr("تعديل الملف","Edit PDF") : tr("إضافة ملف PDF","Add a PDF file")}${pdfEditing ? `<span class="edit-badge">${tr("تعديل","editing")}</span>` : ""}</h3>
+          <p class="panel-desc">${tr("الصق رابط الملف — جوجل درايڤ أو رابط PDF مباشر","Paste the file link — Google Drive or a direct PDF link")}</p>
+          <div class="field-row">
+            <div class="field"><label>${tr("المادة","Subject")}</label><select id="pdfSubjectSelect">${pdfSubjectOptions || `<option value="">${tr("أضف مادة أولاً","Add a subject first")}</option>`}</select></div>
+            <div class="field"><label>${tr("عنوان الملف","File title")}</label><input type="text" id="pdfTitle" value="${pdfEditing ? escapeHtml(pdfEditing.title) : ""}" placeholder="${tr("مثال: شيت المحاضرة 1","e.g. Lecture 1 sheet")}"></div>
+          </div>
+          <div class="field-row"><div class="field"><label>${tr("رابط الملف","File link")}</label><input type="text" id="pdfLink" value="${pdfEditing ? escapeHtml(pdfEditing.driveLink) : ""}" placeholder="https://drive.google.com/file/d/xxxx/view  •  https://example.com/file.pdf"></div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="primary-btn" id="addPdfBtn" style="width:auto;" ${state.subjects.length ? "" : "disabled"}>${pdfEditing ? tr("تحديث الملف","Update PDF") : tr("إضافة الملف","Add PDF")}</button>
+            ${pdfEditing ? `<button class="ghost-btn" id="cancelPdfEdit" style="width:auto;">${tr("إلغاء","Cancel")}</button>` : ""}
+          </div>
+          <div class="row-list">${pdfRows}</div>
+        </div>
+      </div>`;
+  }
+
+  /* ---------------- event wiring ---------------- */
+  let selectedColor = PALETTE[0];
+  let editingSubjectId = null;
+  let editingVideoId = null;
+  let editingPdfId = null;
+
+  function attachViewHandlers(){
+    document.querySelectorAll("[data-open-subject]").forEach(el => el.addEventListener("click", () => goSubject(el.getAttribute("data-open-subject"))));
+    document.querySelectorAll("[data-tab]").forEach(el => el.addEventListener("click", () => goSubject(route.subjectId, el.getAttribute("data-tab"))));
+    document.querySelectorAll("[data-open-item]").forEach(el => {
+      el.addEventListener("click", () => {
+        const id = el.getAttribute("data-open-item");
+        const type = el.getAttribute("data-open-type");
+        const item = (type === "video" ? state.videos : state.pdfs).find(x => x.id === id);
+        if (item) openPlayer(item, type);
+      });
+    });
+    document.querySelectorAll("[data-toggle-watch]").forEach(el => {
+      el.addEventListener("click", (e) => { e.stopPropagation(); toggleWatched(el.getAttribute("data-toggle-watch")); });
+    });
+
+    // language & theme toggles (present on every render)
+    const langBtn = document.getElementById("langToggle");
+    if (langBtn) langBtn.onclick = () => { currentLang = currentLang === "ar" ? "en" : "ar"; render(); };
+    const themeBtn = document.getElementById("themeToggle");
+    if (themeBtn) themeBtn.onclick = () => { currentTheme = currentTheme === "dark" ? "light" : "dark"; applyTheme(); };
+    const brandBtn = document.getElementById("brandBtn");
+    if (brandBtn) brandBtn.onclick = goHome;
+
+    // ---- student auth screen ----
+    if (route.mode !== "admin" && !currentStudent){
+      document.querySelectorAll("[data-auth-tab]").forEach(btn => {
+        btn.addEventListener("click", () => { authTab = btn.getAttribute("data-auth-tab"); authError = ""; authNotice = ""; render(); });
+      });
+      const goAdminLink = document.getElementById("goAdminLink");
+      if (goAdminLink) goAdminLink.addEventListener("click", goAdmin);
+
+      const loginBtn = document.getElementById("studentLoginBtn");
+      if (loginBtn){
+        const doLogin = async () => {
+          const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+          const pw = document.getElementById("loginPassword").value;
+          if (!email || !pw) { authError = tr("اكتب الإيميل والباسورد","Enter your email and password"); render(); return; }
+          const student = state.students.find(s => s.email.toLowerCase() === email);
+          if (!student) { authError = tr("مفيش حساب بالإيميل ده","No account with this email"); render(); return; }
+          const hash = await hashPassword(pw);
+          if (hash !== student.passwordHash) { authError = tr("الباسورد غلط","Incorrect password"); render(); return; }
+          if (student.status === "pending") { authError = tr("حسابك لسه تحت المراجعة، استنى موافقة المشرف","Your account is still pending admin approval"); render(); return; }
+          if (student.status === "rejected") { authError = tr("طلب التسجيل اتقفل، كلم المشرف","Your request was declined — contact the admin"); render(); return; }
+          currentStudent = { id: student.id, name: student.name, email: student.email };
+          sessionStorage.setItem(SESSION_KEY, student.id);
+          authError = ""; authNotice = "";
+          goHome();
+        };
+        loginBtn.addEventListener("click", doLogin);
+      }
+
+      const signupBtn = document.getElementById("studentSignupBtn");
+      if (signupBtn){
+        signupBtn.addEventListener("click", async () => {
+          const name = document.getElementById("suName").value.trim();
+          const email = document.getElementById("suEmail").value.trim().toLowerCase();
+          const pw = document.getElementById("suPassword").value;
+          if (!name || !email || !pw) { authError = tr("املأ كل الحقول","Fill in all fields"); render(); return; }
+          if (!isValidEmail(email)) { authError = tr("الإيميل مش صحيح","Enter a valid email"); render(); return; }
+          if (pw.length < 6) { authError = tr("الباسورد لازم يكون 6 حروف أو أكتر","Password must be at least 6 characters"); render(); return; }
+          if (state.students.some(s => s.email.toLowerCase() === email)) { authError = tr("فيه حساب بالإيميل ده بالفعل","An account with this email already exists"); render(); return; }
+          const passwordHash = await hashPassword(pw);
+          state.students.push({ id: uid(), name, email, passwordHash, status: "pending", createdAt: Date.now() });
+          await persist();
+          authError = "";
+          authNotice = tr("تم إرسال طلبك بنجاح! استنى موافقة المشرف عشان تقدر تسجّل دخول.","Your request was sent! Wait for admin approval, then sign in.");
+          authTab = "login";
+          render();
+        });
+      }
+    }
+
+    // ---- admin auth gate ----
+    if (route.mode === "admin" && !adminUnlocked){
+      const setupBtn = document.getElementById("setupPwBtn");
+      if (setupBtn) setupBtn.addEventListener("click", async () => {
+        const pw1 = document.getElementById("setupPw1").value;
+        const pw2 = document.getElementById("setupPw2").value;
+        if (pw1.length < 6){ authError = tr("الباسورد لازم يكون 6 حروف أو أكتر","Password must be at least 6 characters"); render(); return; }
+        if (pw1 !== pw2){ authError = tr("الباسوردين مش متطابقين","Passwords don't match"); render(); return; }
+        state.settings = state.settings || {};
+        state.settings.passwordHash = await hashPassword(pw1);
+        authError = ""; adminUnlocked = true;
+        await persist();
+        render();
+      });
+      const loginBtn = document.getElementById("loginBtn");
+      if (loginBtn){
+        const doLogin = async () => {
+          const pw = document.getElementById("loginPw").value;
+          const hash = await hashPassword(pw);
+          if (hash === state.settings.passwordHash){ authError = ""; adminUnlocked = true; render(); }
+          else { authError = tr("الباسورد غلط، حاول تاني","Wrong password, try again"); render(); }
+        };
+        loginBtn.addEventListener("click", doLogin);
+        document.getElementById("loginPw").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+      }
+    }
+
+    // ---- admin dashboard ----
+    if (route.mode === "admin" && adminUnlocked){
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) logoutBtn.addEventListener("click", () => { adminUnlocked = false; goHome(); });
+
+      const swatchWrap = document.getElementById("colorSwatches");
+      if (swatchWrap){
+        const swatches = swatchWrap.querySelectorAll(".swatch");
+        swatches.forEach(sw => {
+          sw.addEventListener("click", () => { swatches.forEach(s => s.classList.remove("selected")); sw.classList.add("selected"); selectedColor = sw.getAttribute("data-color"); });
+        });
+      }
+
+      document.querySelectorAll(".move-btn").forEach(btn => btn.addEventListener("click", () => {
+        const kind = btn.getAttribute("data-kind");
+        const id = btn.getAttribute("data-id");
+        const dir = btn.getAttribute("data-dir");
+        const list = kind === "subject" ? state.subjects : (kind === "video" ? state.videos : state.pdfs);
+        reorder(list, id, dir);
+      }));
+
+      const addSubjectBtn = document.getElementById("addSubjectBtn");
+      if (addSubjectBtn) addSubjectBtn.addEventListener("click", async () => {
+        const nameInput = document.getElementById("newSubjectName");
+        const name = nameInput.value.trim();
+        if (!name) { nameInput.focus(); return; }
+        const wasEditing = !!editingSubjectId;
+        if (editingSubjectId){
+          const s = state.subjects.find(x => x.id === editingSubjectId);
+          if (s){ s.name = name; s.color = selectedColor; }
+          editingSubjectId = null;
+        } else {
+          state.subjects.push({ id: uid(), name, color: selectedColor, order: state.subjects.length });
+        }
+        selectedColor = PALETTE[0];
+        await persist(); render();
+        showToast(wasEditing ? tr("تم تحديث المادة", "Subject updated") : tr("تمت إضافة المادة", "Subject added"));
+      });
+      document.getElementById("newSubjectName").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("addSubjectBtn").click(); });
+      const cancelSubjectEdit = document.getElementById("cancelSubjectEdit");
+      if (cancelSubjectEdit) cancelSubjectEdit.addEventListener("click", () => { editingSubjectId = null; selectedColor = PALETTE[0]; render(); });
+
+      const addVideoBtn = document.getElementById("addVideoBtn");
+      if (addVideoBtn) addVideoBtn.addEventListener("click", async () => {
+        const subjectId = document.getElementById("videoSubjectSelect").value;
+        const titleInput = document.getElementById("videoTitle");
+        const linkInput = document.getElementById("videoLink");
+        const title = titleInput.value.trim();
+        const link = linkInput.value.trim();
+        if (!subjectId || !title || !link) return;
+        if (!detectMedia(link)) { linkInput.style.borderColor = "var(--danger)"; showToast(tr("اتأكد من الرابط (يوتيوب، درايڤ، Vimeo، Dailymotion، فيسبوك، أو رابط ملف مباشر)", "Check the link (YouTube, Drive, Vimeo, Dailymotion, Facebook, or a direct file link)"), "err"); return; }
+        linkInput.style.borderColor = "";
+        const wasEditing = !!editingVideoId;
+        if (editingVideoId){
+          const v = state.videos.find(x => x.id === editingVideoId);
+          if (v){ v.subjectId = subjectId; v.title = title; v.driveLink = link; }
+          editingVideoId = null;
+        } else {
+          state.videos.push({ id: uid(), subjectId, title, driveLink: link, order: state.videos.length });
+        }
+        await persist(); render();
+        showToast(wasEditing ? tr("تم تحديث الفيديو", "Video updated") : tr("تمت إضافة الفيديو", "Video added"));
+      });
+      document.getElementById("videoTitle").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("addVideoBtn").click(); });
+      document.getElementById("videoLink").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("addVideoBtn").click(); });
+      const cancelVideoEdit = document.getElementById("cancelVideoEdit");
+      if (cancelVideoEdit) cancelVideoEdit.addEventListener("click", () => { editingVideoId = null; render(); });
+
+      const addPdfBtn = document.getElementById("addPdfBtn");
+      if (addPdfBtn) addPdfBtn.addEventListener("click", async () => {
+        const subjectId = document.getElementById("pdfSubjectSelect").value;
+        const titleInput = document.getElementById("pdfTitle");
+        const linkInput = document.getElementById("pdfLink");
+        const title = titleInput.value.trim();
+        const link = linkInput.value.trim();
+        if (!subjectId || !title || !link) return;
+        if (!detectMedia(link)) { linkInput.style.borderColor = "var(--danger)"; showToast(tr("اتأكد من الرابط (درايڤ أو رابط PDF مباشر)", "Check the link (Drive or a direct PDF link)"), "err"); return; }
+        linkInput.style.borderColor = "";
+        const wasEditing = !!editingPdfId;
+        if (editingPdfId){
+          const p = state.pdfs.find(x => x.id === editingPdfId);
+          if (p){ p.subjectId = subjectId; p.title = title; p.driveLink = link; }
+          editingPdfId = null;
+        } else {
+          state.pdfs.push({ id: uid(), subjectId, title, driveLink: link, order: state.pdfs.length });
+        }
+        await persist(); render();
+        showToast(wasEditing ? tr("تم تحديث الملف", "PDF updated") : tr("تمت إضافة الملف", "PDF added"));
+      });
+      document.getElementById("pdfTitle").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("addPdfBtn").click(); });
+      document.getElementById("pdfLink").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("addPdfBtn").click(); });
+      const cancelPdfEdit = document.getElementById("cancelPdfEdit");
+      if (cancelPdfEdit) cancelPdfEdit.addEventListener("click", () => { editingPdfId = null; render(); });
+
+
+      document.querySelectorAll("[data-edit-subject]").forEach(btn => btn.addEventListener("click", () => {
+        editingSubjectId = btn.getAttribute("data-edit-subject"); editingVideoId = null; editingPdfId = null; render();
+      }));
+      document.querySelectorAll("[data-edit-video]").forEach(btn => btn.addEventListener("click", () => {
+        editingVideoId = btn.getAttribute("data-edit-video"); editingSubjectId = null; editingPdfId = null; render();
+      }));
+      document.querySelectorAll("[data-edit-pdf]").forEach(btn => btn.addEventListener("click", () => {
+        editingPdfId = btn.getAttribute("data-edit-pdf"); editingSubjectId = null; editingVideoId = null; render();
+      }));
+
+      document.querySelectorAll("[data-del-subject]").forEach(btn => btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-del-subject");
+        const s = state.subjects.find(x => x.id === id);
+        confirmAction(tr(`هتمسح مادة "${s ? s.name : ""}" وكل الفيديوهات والملفات بتاعتها. متأكد؟`, `Delete subject "${s ? s.name : ""}" and all its videos/PDFs? This can't be undone.`), async () => {
+          state.subjects = state.subjects.filter(x => x.id !== id);
+          state.videos = state.videos.filter(v => v.subjectId !== id);
+          state.pdfs = state.pdfs.filter(p => p.subjectId !== id);
+          if (editingSubjectId === id) editingSubjectId = null;
+          await persist(); render();
+          showToast(tr("تم حذف المادة", "Subject deleted"));
+        });
+      }));
+      document.querySelectorAll("[data-del-video]").forEach(btn => btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-del-video");
+        confirmAction(tr("هتمسح الفيديو ده. متأكد؟", "Delete this video? This can't be undone."), async () => {
+          state.videos = state.videos.filter(v => v.id !== id);
+          if (editingVideoId === id) editingVideoId = null;
+          await persist(); render();
+          showToast(tr("تم حذف الفيديو", "Video deleted"));
+        });
+      }));
+      document.querySelectorAll("[data-del-pdf]").forEach(btn => btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-del-pdf");
+        confirmAction(tr("هتمسح الملف ده. متأكد؟", "Delete this PDF? This can't be undone."), async () => {
+          state.pdfs = state.pdfs.filter(p => p.id !== id);
+          if (editingPdfId === id) editingPdfId = null;
+          await persist(); render();
+          showToast(tr("تم حذف الملف", "PDF deleted"));
+        });
+      }));
+      document.querySelectorAll("[data-approve-student]").forEach(btn => btn.addEventListener("click", async () => {
+        const s = state.students.find(x => x.id === btn.getAttribute("data-approve-student"));
+        if (s) s.status = "approved";
+        await persist(); render();
+        showToast(tr("تم قبول الطالب", "Student approved"));
+      }));
+      document.querySelectorAll("[data-reject-student]").forEach(btn => btn.addEventListener("click", async () => {
+        const s = state.students.find(x => x.id === btn.getAttribute("data-reject-student"));
+        if (s) s.status = "rejected";
+        await persist(); render();
+        showToast(tr("تم رفض الطلب", "Request rejected"));
+      }));
+      document.querySelectorAll("[data-del-student]").forEach(btn => btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-del-student");
+        confirmAction(tr("هتمسح الطالب ده نهائياً. متأكد؟", "Remove this student permanently?"), async () => {
+          state.students = state.students.filter(s => s.id !== id);
+          await persist(); render();
+          showToast(tr("تم حذف الطالب", "Student removed"));
+        });
+      }));
+    }
+  }
+
+  document.getElementById("menuToggle")?.addEventListener("click", () => {
+    document.getElementById("sidebar").classList.add("open");
+    document.getElementById("scrim").classList.add("open");
+  });
+  document.getElementById("scrim").addEventListener("click", closeMobileNav);
+
+  initData();
+})();
+</script>
+</body>
+</html>
