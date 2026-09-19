@@ -14,8 +14,6 @@
   };
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --bg: #090c12;
@@ -576,47 +574,21 @@
 
   /* ---------------- data layer ---------------- */
   const PALETTE = ["#4d8dff", "#ffb15e", "#3ddc97", "#ff6f91", "#8f7cff", "#3fc0d0"];
-  const DOC_PATH = "taraddud/content";
   const LOCAL_KEY = "taraddud_platform_data_v2";
   const SESSION_KEY = "taraddud_student_session";
 
   /* =====================================================================
-     ربط قاعدة بيانات Firebase (مجانية) — عشان بيانات الطلاب والمواد
-     تتزامن بين كل زوار الموقع (مش بس متصفحك إنت).
+     قاعدة بيانات Supabase — مجانية ومربوطة بالفعل، مفيش أي خطوة مطلوبة
+     منك. بيانات الطلاب والمواد بتتزامن بين كل زوار الموقع تلقائيًا.
 
-     الخطوات:
-     1) افتح https://console.firebase.google.com وسجل دخول بحساب جوجل
-     2) اعمل "Add project" (مجاني)
-     3) من القايمة الجانبية: Build > Firestore Database > Create database
-        (اختار Start in production mode ثم اختار أقرب منطقة ليك)
-     4) بعد إنشاء قاعدة البيانات، روح لإعدادات المشروع (⚙️ Project settings)
-        > Your apps > اعمل "</> Web app" جديد، وهياديك object زي ده:
-        { apiKey: "...", authDomain: "...", projectId: "...", ... }
-        انسخه والصقه بدل الـ object الفاضي تحت.
-     5) من Firestore > Rules، حط القاعدة دي عشان أي حد يقدر يقرأ ويكتب
-        (مناسب لموقع تعليمي بسيط بدون بيانات حساسة):
-           rules_version = '2';
-           service cloud.firestore {
-             match /databases/{database}/documents {
-               match /{document=**} { allow read, write: if true; }
-             }
-           }
-        (تنويه أمان: الباسورد بتاع لوحة التحكم بيتفحص في المتصفح بس،
-        فالقاعدة دي مفتوحة تقنيًا لأي حد يعرف يكتب مباشرة على Firestore.
-        كفاية لموقع محاضرات عادي، بس متحطش فيه بيانات حساسة فعلاً.)
-     6) احفظ الملف وارفعه لأي استضافة (Netlify / Vercel / GitHub Pages).
-
-     لو سبت الـ object فاضي زي ما هو، الموقع هيشتغل بس بشكل محلي في
-     متصفحك إنت بس (زي ما كان قبل كده)، من غير مزامنة مع باقي الزوار.
+     (تنويه أمان: الباسورد بتاع لوحة التحكم بيتفحص في المتصفح بس، فالجدول
+     ده مسموح لأي حد يقرأ ويكتب فيه مباشرة عن طريق الـ API — كفاية لموقع
+     محاضرات عادي، بس متحطش فيه بيانات حساسة فعلاً.)
   ===================================================================== */
-  const FIREBASE_CONFIG = {
-    // apiKey: "AIzaSy...",
-    // authDomain: "your-project.firebaseapp.com",
-    // projectId: "your-project",
-    // storageBucket: "your-project.appspot.com",
-    // messagingSenderId: "...",
-    // appId: "..."
-  };
+  const SUPABASE_URL = "https://pekybddpfusmqjwnmxqh.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBla3liZGRwZnVzbXFqd25teHFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MTM3ODQsImV4cCI6MjEwNTM4OTc4NH0.B7yrw9-UkDdRtK7YqHbA1bT3T1hZQg1txaKYZbE8qDQ";
+  const SUPABASE_ROW_ID = "taraddud_main";
+  const SYNC_POLL_MS = 4000;
 
   let state = {
     subjects: [],
@@ -675,15 +647,54 @@
   }
   function saveLocal(data){ try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch(e){} }
 
+  const SB_HEADERS = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": "application/json"
+  };
+  let syncTimer = null;
+  let lastRemoteJson = null;
+
   async function persist(){
-    if (db && dbReady) {
-      try { await db.doc(DOC_PATH).set(state); }
-      catch(e){ console.warn("db write failed, saving locally", e); saveLocal(state); }
-    } else { saveLocal(state); }
+    saveLocal(state);
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/app_state?id=eq.${SUPABASE_ROW_ID}`,
+        { method: "PATCH", headers: { ...SB_HEADERS, Prefer: "return=minimal" }, body: JSON.stringify({ data: state, updated_at: new Date().toISOString() }) }
+      );
+      if (res.ok) { dbReady = true; lastRemoteJson = JSON.stringify(state); updateSyncIndicator(true); }
+      else { dbReady = false; updateSyncIndicator(false); }
+    } catch(e){ console.warn("supabase write failed, saved locally only", e); dbReady = false; updateSyncIndicator(false); }
   }
 
-  function firebaseConfigured(){
-    return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+  async function fetchRemoteState(){
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/app_state?id=eq.${SUPABASE_ROW_ID}&select=data`,
+      { headers: SB_HEADERS }
+    );
+    if (!res.ok) throw new Error("fetch failed: " + res.status);
+    const rows = await res.json();
+    if (!rows || !rows[0]) return null;
+    return rows[0].data;
+  }
+
+  function startSyncPolling(){
+    if (syncTimer) clearInterval(syncTimer);
+    syncTimer = setInterval(async () => {
+      try {
+        const remote = await fetchRemoteState();
+        if (remote){
+          const json = JSON.stringify(remote);
+          if (json !== lastRemoteJson) {
+            lastRemoteJson = json;
+            state = Object.assign(defaultData(), remote);
+            restoreSession();
+            render();
+          }
+        }
+        if (!dbReady) { dbReady = true; updateSyncIndicator(true); }
+      } catch(e){ dbReady = false; updateSyncIndicator(false); }
+    }, SYNC_POLL_MS);
   }
 
   async function initData(){
@@ -691,29 +702,23 @@
     restoreSession();
     render();
 
-    if (!firebaseConfigured() || typeof firebase === "undefined") {
-      db = null;
-      updateSyncIndicator(false);
-      return;
-    }
-
     try {
-      const app = firebase.apps && firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(FIREBASE_CONFIG);
-      db = firebase.firestore(app);
-    } catch(e){ console.warn("firebase init failed", e); db = null; }
-
-    if (db) {
-      try {
-        db.doc(DOC_PATH).onSnapshot((snap) => {
-          if (snap && snap.exists) state = Object.assign(defaultData(), snap.data());
-          else if (!dbReady) state = loadLocal();
-          dbReady = true;
-          restoreSession();
-          updateSyncIndicator(true);
-          render();
-        }, (err) => { console.warn("db subscribe error", err); updateSyncIndicator(false); });
-      } catch(e){ console.warn("db subscribe failed", e); updateSyncIndicator(false); }
-    } else { updateSyncIndicator(false); }
+      const remote = await fetchRemoteState();
+      if (remote){
+        state = Object.assign(defaultData(), remote);
+        lastRemoteJson = JSON.stringify(remote);
+        restoreSession();
+      }
+      dbReady = true;
+      db = true;
+      updateSyncIndicator(true);
+      render();
+      startSyncPolling();
+    } catch(e){
+      console.warn("supabase init failed, staying local", e);
+      db = null; dbReady = false;
+      updateSyncIndicator(false);
+    }
   }
 
   function restoreSession(){
